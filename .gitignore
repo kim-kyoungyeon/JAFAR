@@ -12,6 +12,12 @@
 .idea/**/dictionaries
 .idea/**/shelf
 
+# 추적금지 
+/../BE/
+/../FE_OP/
+/../FE_REACT/
+
+
 # AWS User-specific
 .idea/**/aws.xml
 
@@ -457,6 +463,12 @@ docs/_build/
 
 # PyBuilder
 .pybuilder/
+
+# ignore 
+../BE/*
+../FE_OP/*
+../FE_REACT/*
+
 
 # Jupyter Notebook
 .ipynb_checkpoints
