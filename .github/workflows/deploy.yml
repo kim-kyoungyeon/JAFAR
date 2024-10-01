@@ -24,7 +24,7 @@ jobs:
     - name: Install dependencies
       run: yarn install --frozen-lockfile
 
-      - name: Build
+    - name: Build
       run: yarn build
 
     - name: Set up SSH
