@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@toast-ui/editor": "^3.2.2",
     "@toast-ui/react-image-editor": "^3.15.2",
     "ajv": "^8.17.1",
     "ajv-keywords": "^5.1.0",
@@ -23,6 +24,9 @@
       "react-app",
       "react-app/jest"
     ]
+  },
+  "engines": {
+    "node": "16.20.2"
   },
   "browserslist": {
     "production": [
