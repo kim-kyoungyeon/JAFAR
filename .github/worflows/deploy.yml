@@ -22,6 +22,10 @@ jobs:
           echo "${{secrets.DEPLOY_MAENG17}}" > ~/.ssh/maeng17
           chmod 600 ~/.ssh/maeng17
           ssh-add ~/.ssh/maeng17
+      - name: Set up Node.js
+        uses : action/setup-node@v2
+        with:
+          node-version: "16.20.2"
 
       - name: Deploy to EC2
         run: |
