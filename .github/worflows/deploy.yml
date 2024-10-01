@@ -8,22 +8,21 @@ on:
 
 jobs:
   build-and-deploy:
-    if : github.event.pull_request.merges == true
+    if: github.event.pull_request.merges == true
     runs-on: ubuntu-latest
-  
-   
+
     steps:
       - name: Checkout Code
         uses: actions/checkout@v2
 
       - name: Set up Node.js
-        uses : action/setup-node@v2
+        uses: action/setup-node@v2
         with:
           node-version: "16.20.2"
 
       - name: Install dependencies
         run: yarn install --frozen-lockfile
-     
+
       - name: Build
         run: yarn build
 
@@ -31,8 +30,9 @@ jobs:
         uses: webfactory/ssh-agent@v0.5.3
         with:
           ssh-private-key: ${{ secrets.DEPLOY_KIM }}
-      fY maeng17
-        run : |
+
+      - name: ADD SSH KEY maeng17
+        run: |
           echo "${{secrets.DEPLOY_MAENG17}}" > ~/.ssh/maeng17
           chmod 600 ~/.ssh/maeng17
           ssh-add ~/.ssh/maeng17
