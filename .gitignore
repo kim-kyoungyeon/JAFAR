@@ -167,6 +167,8 @@ buildNumber.properties
 # https://github.com/takari/maven-wrapper#usage-without-binary-jar
 .mvn/wrapper/maven-wrapper.jar
 
+# 테스트 커버리지 보고서
+/coverage
 # Eclipse m2e generated files
 # Eclipse Core
 .project
@@ -212,6 +214,8 @@ bower_components
 
 # Compiled binary addons (https://nodejs.org/api/addons.html)
 build/Release
+# 프로덕션 빌드 파일
+/build
 
 # Dependency directories
 node_modules/
