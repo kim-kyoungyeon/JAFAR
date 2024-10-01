@@ -31,8 +31,7 @@ jobs:
         uses: webfactory/ssh-agent@v0.5.3
         with:
           ssh-private-key: ${{ secrets.DEPLOY_KIM }}
-      
-      -name : ADD SSH KEY maeng17
+      fY maeng17
         run : |
           echo "${{secrets.DEPLOY_MAENG17}}" > ~/.ssh/maeng17
           chmod 600 ~/.ssh/maeng17
