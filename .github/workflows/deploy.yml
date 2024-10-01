@@ -21,14 +21,30 @@ jobs:
       with:
         node-version: "16.20.2"
 
+    - name: Cache node modules
+      uses: actions/cache@v2
+      with:
+        path: |
+          node_modules
+          ~/.cache/yarn
+        key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-yarn-
+
     - name: Install dependencies
       run: yarn install --frozen-lockfile
     
-    - name: Verify Build Directory
-      run: ls -la build
+    - name: List Project Files Before Build
+      run: ls -la
 
     - name: Build
-      run: yarn build
+      run: yarn build --verbose 
+
+    - name: List Project Files After Build
+      run: ls -la
+
+    - name: Verify Build Directory
+      run: ls -la build
 
     - name: Set up SSH
       uses: webfactory/ssh-agent@v0.5.3
