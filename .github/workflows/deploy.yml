@@ -56,7 +56,12 @@ jobs:
         echo "${{secrets.DEPLOY_MAENG17}}" > ~/.ssh/maeng17
         chmod 600 ~/.ssh/maeng17
         ssh-add ~/.ssh/maeng17
-
+   
+    - name: Add EC2 Host to known_hosts
+      run: |
+        mkdir -p ~/.ssh
+        ssh-keyscan -H 43.203.233.134 >> ~/.ssh/known_hosts
+   
     - name: Deploy to EC2
       run: |
         scp -r build/* ec2-user@43.203.233.134:/home/ec2-user/JAFAR/build/
