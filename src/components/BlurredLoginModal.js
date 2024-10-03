@@ -72,7 +72,7 @@ const useLoginForm = (initialState, validate, onSubmit) => {
   return { formData, errors, isSubmitting, handleChange, handleSubmit };
 };
 
-export default function BlurredLoginModal({ onLoginSuccess, onClose }) {
+export default function BlurredLoginModal({ isOpen, onLoginSuccess, onClose }) {
   const initialSTate = { email: "", password: "" };
 
   const validateForm = (data) => {
@@ -96,6 +96,7 @@ export default function BlurredLoginModal({ onLoginSuccess, onClose }) {
 
   const { formData, errors, isSubmitting, handleChange, handleSubmit } =
     useLoginForm(initialSTate, validateForm, onSubmit);
+  if (!isOpen) return null;
 
   return (
     <div className="modal-overlay">
@@ -129,9 +130,6 @@ export default function BlurredLoginModal({ onLoginSuccess, onClose }) {
             <SubmitButton isSubmitting={isSubmitting} />
           </form>
         </div>
-        <button on Click={onClose} className="close-button">
-          x
-        </button>
       </div>
     </div>
   );

@@ -46,7 +46,25 @@ html {
     transparent 70%
   );
 }
+.button {
+  border-radius: 25px;
+  border: none;
+  padding: 10px 20px;
+  font-size: 16px;
+  cursor: pointer;
+  margin: 5px;
+  transition: background-color 0.3s ease;
+}
 
+.button-login {
+  background-color: #ffffff;
+  color: #000000;
+  border: 1px solid #cccccc;
+}
+
+.button-login:hover {
+  background-color: #f0f0f0;
+}
 /* Content container */
 .content-container {
   position: relative;

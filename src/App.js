@@ -1,8 +1,9 @@
+// src/App.js
+import React from "react";
 import "./styles/App.css";
 import "./styles/BlurredLoginModal.css";
-import TestTuiEditor from "./components/TestTuiEditor";
-import BlurredLoginModal from "./components/BlurredLoginModal";
-import React, { useState } from "react";
+import ProtectedImageEditorWithHooks from "./components/ProtectedImageEditorWithHooks";
+
 function App() {
   return (
     <div className="app-container">
@@ -10,7 +11,7 @@ function App() {
       <div className="radial-gradient-1"></div>
       <div className="radial-gradient-2"></div>
       <div className="content-container">
-        <TestTuiEditor />
+        <ProtectedImageEditorWithHooks />
       </div>
     </div>
   );
