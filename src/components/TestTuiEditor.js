@@ -1,74 +1,28 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import ImageEditor from "@toast-ui/react-image-editor";
 import "tui-image-editor/dist/tui-image-editor.css";
 import BlurredLoginModal from "./BlurredLoginModal";
-import styled from "styled-components";
 import "../styles/editor.css";
 import sampleLogo from "../styles/sampleLogo.jpg";
 
-const EditorContainer = styled.div`
-  display: flex;
-  background-color: #1e1e1e;
-  color: white;
-  height: 100vh;
-`;
-
-const MainContent = styled.div`
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-`;
-
-const Header = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 10px 20px;
-  background-color: #2d2d2d;
-`;
-
-const RightSidebar = styled.div`
-  width: 300px;
-  background-color: #2d2d2d;
-  padding: 20px;
-`;
-
-const ImagePreview = styled.div`
-  width: 100%;
-  height: 100px;
-  background-color: #444;
-  margin-bottom: 20px;
-`;
-
-const Button = styled.button`
-  background-color: #0066cc;
-  color: white;
-  border: none;
-  padding: 8px 16px;
-  border-radius: 4px;
-  cursor: pointer;
-`;
-
 const TestTuiEditor = () => {
-const [isLoggedIn, setIsLoggedIn] = useState(true); // 예시를 위해 true로 설정
-
+ 
   return (
-    <EditorContainer>
-      <MainContent>
-        <Header>
+    <div className="editor-container">
+      <div className="main-content">
+        <header className="header">
           <img src= {sampleLogo} width='50px'/>
-          <div>
-            <Button>내보내기</Button>
+          <div className="header-buttons">
+            <button className="button">내보내기</button>
           </div>
-        </Header>
-        {isLoggedIn && (
+        </header>
           <ImageEditor
             includeUI={{
               menu: ["crop", "flip", "rotate", "draw", "shape", "icon", "text", "mask", "filter"],
               initMenu: "filter",
               uiSize: {
                 width: "100%",
-                height: "calc(100vh - 60px)", // Header 높이를 뺀 값
+                height: "calc(100vh - 60px)", 
               },
               menuBarPosition: "left",
             }}
@@ -80,17 +34,16 @@ const [isLoggedIn, setIsLoggedIn] = useState(true); // 예시를 위해 true로 
             }}
             usageStatistics={true}
           />
-        )}
-      </MainContent>
-      <RightSidebar>
+      </div>
+      <div className="right-sidebar">
         <h3>생성형 이미지 추천</h3>
         <p>사진과 유사한 생성형 이미지를 추천합니다.</p>
-        <Button>생성형 프롬프트 쓰기</Button>
-        <ImagePreview />
-        <ImagePreview />
-        <ImagePreview />
-      </RightSidebar>
-    </EditorContainer>
+        <button className="button">생성형 프롬프트 쓰기</button>
+        <div className="image-preview"></div>
+        <div className="image-preview"></div>
+        <div className="image-preview"></div>
+      </div>
+    </div>
   );
 };
 
