@@ -6,6 +6,10 @@ import "../styles/editor.css";
 import sampleLogo from "../styles/sampleLogo.jpg";
 
 const TestTuiEditor = () => {
+<<<<<<< Updated upstream
+<<<<<<< Updated upstream
+<<<<<<< Updated upstream
+<<<<<<< Updated upstream
  
   return (
     <div className="editor-container">
@@ -14,11 +18,38 @@ const TestTuiEditor = () => {
           <img src= {sampleLogo} width='50px'/>
           <div className="header-buttons">
             <button className="button">내보내기</button>
+=======
+=======
+>>>>>>> Stashed changes
+=======
+>>>>>>> Stashed changes
+=======
+>>>>>>> Stashed changes
+  const [isLoggedIn, setIsLoggedIn] = useState(true); // 예시를 위해 true로 설정
+
+  return (
+    <EditorContainer>
+      <MainContent>
+        <Header>
+          <img src={sampleLogo} width="50px" />
+          <div>
+            <Button>내보내기</Button>
+>>>>>>> Stashed changes
           </div>
         </header>
           <ImageEditor
             includeUI={{
-              menu: ["crop", "flip", "rotate", "draw", "shape", "icon", "text", "mask", "filter"],
+              menu: [
+                "crop",
+                "flip",
+                "rotate",
+                "draw",
+                "shape",
+                "icon",
+                "text",
+                "mask",
+                "filter",
+              ],
               initMenu: "filter",
               uiSize: {
                 width: "100%",
