@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 import "./styles/App.css";
 import "./styles/BlurredLoginModal.css";
 import TestTuiEditor from "./components/TestTuiEditor";
@@ -13,6 +12,8 @@ function App() {
       <div className="content-container">
         <TestTuiEditor />
       </div>
+    </div>
+  );
 }
 
 export default App;
