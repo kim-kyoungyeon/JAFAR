@@ -1,11 +1,19 @@
 import React, { useState, useRef, useEffect } from "react";
 import ImageEditor from "@toast-ui/react-image-editor";
 import "tui-image-editor/dist/tui-image-editor.css";
+<<<<<<< HEAD
 import withLogin from "./withLogin";
 import "../styles/editor.css";
 import sampleLogo from "../styles/sampleLogo.jpg";
 
 const TestTuiEditor = ({ isLoggedIn, username, handleLoginClick }) => {
+=======
+import "tui-color-picker/dist/tui-color-picker.css";
+import "../styles/editor.css";
+import sampleLogo from "../styles/sampleLogo.jpg";
+
+const TestTuiEditor = () => {
+>>>>>>> 607d61b7335c93c7fd2d129cdb59cdfb37203a90
   const editorRef = useRef(null);
   const [editorInstance, setEditorInstance] = useState(null);
 
@@ -17,6 +25,7 @@ const TestTuiEditor = ({ isLoggedIn, username, handleLoginClick }) => {
           const instance = editorRef.current.getInstance();
           setEditorInstance(instance);
           console.log("Editor instance initialized:", instance);
+<<<<<<< HEAD
 
           // 초기 이미지 로드
           instance
@@ -29,12 +38,27 @@ const TestTuiEditor = ({ isLoggedIn, username, handleLoginClick }) => {
         } catch (error) {
           console.error("Error initializing editor:", error);
           timeoutId = setTimeout(initializeEditor, 100);
+=======
+        
+          
+          // 초기 이미지 로드
+          instance.loadImageFromURL('data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7', 'blank')
+            .then(() => console.log("Initial image loaded"))
+            .catch(err => console.error("Error loading initial image:", err));
+        } catch (error) {
+          console.error("Error initializing editor:", error);
+          timeoutId = setTimeout(initializeEditor, 100); 
+>>>>>>> 607d61b7335c93c7fd2d129cdb59cdfb37203a90
         }
       } else {
         timeoutId = setTimeout(initializeEditor, 100);
       }
     };
+<<<<<<< HEAD
 
+=======
+    
+>>>>>>> 607d61b7335c93c7fd2d129cdb59cdfb37203a90
     initializeEditor();
 
     return () => {
@@ -45,21 +69,35 @@ const TestTuiEditor = ({ isLoggedIn, username, handleLoginClick }) => {
   }, []);
 
   const handleUpload = () => {
+<<<<<<< HEAD
     const uploadInput = document.createElement("input");
     uploadInput.type = "file";
     uploadInput.accept = "image/*";
+=======
+    const uploadInput = document.createElement('input');
+    uploadInput.type = 'file';
+    uploadInput.accept = 'image/*';
+>>>>>>> 607d61b7335c93c7fd2d129cdb59cdfb37203a90
     uploadInput.onchange = (event) => {
       const file = event.target.files[0];
       const reader = new FileReader();
       reader.onload = (e) => {
         const imageUrl = e.target.result;
         if (editorInstance) {
+<<<<<<< HEAD
           editorInstance
             .loadImageFromURL(imageUrl, "uploaded")
             .then(() => console.log("Image uploaded successfully"))
             .catch((err) => console.error("Error uploading image:", err));
         } else {
           console.error("Editor instance is not available");
+=======
+          editorInstance.loadImageFromURL(imageUrl, 'uploaded')
+            .then(() => console.log("Image uploaded successfully"))
+            .catch(err => console.error("Error uploading image:", err));
+        } else {
+          console.error('Editor instance is not available');
+>>>>>>> 607d61b7335c93c7fd2d129cdb59cdfb37203a90
         }
       };
       reader.readAsDataURL(file);
@@ -70,12 +108,21 @@ const TestTuiEditor = ({ isLoggedIn, username, handleLoginClick }) => {
   const handleDownload = () => {
     if (editorInstance) {
       const dataURL = editorInstance.toDataURL();
+<<<<<<< HEAD
       const link = document.createElement("a");
       link.download = "edited-image.png";
       link.href = dataURL;
       link.click();
     } else {
       console.error("Editor instance is not available");
+=======
+      const link = document.createElement('a');
+      link.download = 'edited-image.png';
+      link.href = dataURL;
+      link.click();
+    } else {
+      console.error('Editor instance is not available');
+>>>>>>> 607d61b7335c93c7fd2d129cdb59cdfb37203a90
     }
   };
 
@@ -131,7 +178,13 @@ const TestTuiEditor = ({ isLoggedIn, username, handleLoginClick }) => {
               width: "100%",
               height: "calc(100vh - 60px)",
             },
-            menuBarPosition: "left",
+            menu: ['crop', 'flip', 'rotate', 'draw', 'shape', 'icon', 'text', 'mask', 'filter'],
+            initMenu: 'filter',
+            uiSize: {
+              width: '100%',
+              height: 'calc(100vh - 60px)',
+            },
+            menuBarPosition: 'left',
           }}
           cssMaxHeight={500}
           cssMaxWidth={700}
