@@ -1,8 +1,8 @@
 import "./styles/App.css";
 import "./styles/BlurredLoginModal.css";
 import TestTuiEditor from "./components/TestTuiEditor";
-import BlurredLoginModal from "./components/BlurredLoginModal";
-import React, { useState } from "react";
+import S3ImageCRUD from "./services/S3ImageCRUD";
+
 function App() {
   return (
     <div className="app-container">
@@ -11,6 +11,9 @@ function App() {
       <div className="radial-gradient-2"></div>
       <div className="content-container">
         <TestTuiEditor />
+      </div>
+      <div className="App">
+        <S3ImageCRUD />
       </div>
     </div>
   );

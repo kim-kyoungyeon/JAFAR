@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { AlertCircle } from "lucide-react";
 import "../styles/BlurredLoginModal.css";
+
 const FormInput = ({
   id,
   name,
@@ -73,7 +74,7 @@ const useLoginForm = (initialState, validate, onSubmit) => {
 };
 
 export default function BlurredLoginModal({ onLoginSuccess, onClose }) {
-  const initialSTate = { email: "", password: "" };
+  const initialState = { email: "", password: "" };
 
   const validateForm = (data) => {
     let errors = {};
@@ -91,11 +92,13 @@ export default function BlurredLoginModal({ onLoginSuccess, onClose }) {
   const onSubmit = async (data) => {
     await new Promise((resolve) => setTimeout(resolve, 1500));
     console.log("Form submit", data);
-    onLoginSuccess();
+    // Simulate getting a username from the server
+    const username = data.email.split("@")[0];
+    onLoginSuccess(username);
   };
 
   const { formData, errors, isSubmitting, handleChange, handleSubmit } =
-    useLoginForm(initialSTate, validateForm, onSubmit);
+    useLoginForm(initialState, validateForm, onSubmit);
 
   return (
     <div className="modal-overlay">
@@ -114,7 +117,7 @@ export default function BlurredLoginModal({ onLoginSuccess, onClose }) {
               onChange={handleChange}
               placeholder="aladin@lamp.com"
               label="user email"
-              errror={errors.email}
+              error={errors.email}
             />
             <FormInput
               id="password"
@@ -129,8 +132,8 @@ export default function BlurredLoginModal({ onLoginSuccess, onClose }) {
             <SubmitButton isSubmitting={isSubmitting} />
           </form>
         </div>
-        <button on Click={onClose} className="close-button">
-          x
+        <button onClick={onClose} className="close-button">
+          Close
         </button>
       </div>
     </div>
