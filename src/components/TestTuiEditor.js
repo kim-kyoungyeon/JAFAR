@@ -3,11 +3,24 @@ import ImageEditor from "@toast-ui/react-image-editor";
 import "tui-image-editor/dist/tui-image-editor.css";
 import withLogin from "./withLogin";
 import "../styles/editor.css";
+import BlurredLoginModal from "../components/BlurredLoginModal";
 import sampleLogo from "../styles/sampleLogo.jpg";
+import axios from "axios"; // axios를 직접 import
 
-const TestTuiEditor = ({ isLoggedIn, username, handleLoginClick }) => {
+const FASTAPI_URL = "http://3.35.166.17:8000"; // FastAPI 서버 주소
+
+const TestTuiEditor = ({
+  isLoggedIn,
+  username,
+  handleLogout,
+  handleLoginSuccess,
+}) => {
   const editorRef = useRef(null);
   const [editorInstance, setEditorInstance] = useState(null);
+  const [prompt, setPrompt] = useState("");
+  const [recommendedImages, setRecommendedImages] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [showLoginModal, setShowLoginModal] = useState(false);
 
   useEffect(() => {
     let timeoutId;
@@ -77,6 +90,32 @@ const TestTuiEditor = ({ isLoggedIn, username, handleLoginClick }) => {
       console.error("Editor instance is not available");
     }
   };
+  const handleGenerateImages = async () => {
+    if (!prompt) {
+      alert("프롬프트를 입력해주세요.");
+      return;
+    }
+    setIsLoading(true);
+    try {
+      const response = await axios.post(`${FASTAPI_URL}/generate-images`, {
+        prompt,
+      });
+      setRecommendedImages(response.data.images);
+    } catch (error) {
+      console.error("Error generating images:", error);
+      alert("이미지 생성 중 오류가 발생했습니다.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleLoginClick = () => {
+    setShowLoginModal(true); // 로그인 버튼 클릭 시 모달 표시
+  };
+
+  const handleCloseModal = () => {
+    setShowLoginModal(false); // 모달 닫기
+  };
 
   return (
     <div className="editor-container">
@@ -102,9 +141,15 @@ const TestTuiEditor = ({ isLoggedIn, username, handleLoginClick }) => {
           </div>
           <div className="header-buttons">
             <button className="button">내보내기</button>
-            <button className="button" onClick={handleLoginClick}>
-              {isLoggedIn ? username : "로그인"}
-            </button>
+            {isLoggedIn ? (
+              <button className="button" onClick={handleLogout}>
+                Logout ({username})
+              </button>
+            ) : (
+              <button className="button" onClick={handleLoginClick}>
+                Login
+              </button>
+            )}
           </div>
         </header>
         <ImageEditor
@@ -113,22 +158,6 @@ const TestTuiEditor = ({ isLoggedIn, username, handleLoginClick }) => {
             loadImage: {
               path: "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7",
               name: "Blank",
-            },
-            menu: [
-              "crop",
-              "flip",
-              "rotate",
-              "draw",
-              "shape",
-              "icon",
-              "text",
-              "mask",
-              "filter",
-            ],
-            initMenu: "filter",
-            uiSize: {
-              width: "100%",
-              height: "calc(100vh - 60px)",
             },
             menu: [
               "crop",
@@ -160,11 +189,26 @@ const TestTuiEditor = ({ isLoggedIn, username, handleLoginClick }) => {
       <div className="right-sidebar">
         <h3>생성형 이미지 추천</h3>
         <p>사진과 유사한 생성형 이미지를 추천합니다.</p>
-        <button className="button">생성형 프롬프트 쓰기</button>
-        <div className="image-preview"></div>
-        <div className="image-preview"></div>
-        <div className="image-preview"></div>
+        <input
+          type="text"
+          value={prompt}
+          onChange={(e) => setPrompt(e.target.value)}
+          placeholder="프롬프트 입력"
+        />
+        <button
+          className="button"
+          onClick={handleGenerateImages}
+          disabled={isLoading}
+        >
+          {isLoggedIn ? "생성 중..." : "이미지 생성"}
+        </button>
+        {recommendedImages.map((image, index) => (
+          <div key={index} className="image-preview">
+            <img src={image} alt={`Generated image ${index + 1}`} />
+          </div>
+        ))}
       </div>
+      {showLoginModal && <BlurredLoginModal onClose={handleCloseModal} />}
     </div>
   );
 };
