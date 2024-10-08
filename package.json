@@ -1,7 +1,6 @@
 {
   "name": "jafar_front",
   "version": "0.1.0",
-  "proxy": "http://3.39.251.48",
   "private": true,
   "dependencies": {
     "@toast-ui/editor": "^3.2.2",
@@ -10,6 +9,7 @@
     "ajv-keywords": "^5.1.0",
     "http-proxy-middleware": "^3.0.3",
     "js-cookie": "^3.0.5",
+    "jwt-decode": "3.1.2",
     "lucide-react": "^0.447.0",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",

@@ -1,7 +1,10 @@
 import React from "react";
 import "../styles/BlurredLoginModal.css";
+import useAuth from "../utils/useAuth";
 
-export default function BlurredLoginModal({ onClose }) {
+export default function BlurredLoginModal({ onClose, onLoginSuccess }) {
+  const { login } = useAuth();
+
   const handleOAuthLogin = (provider) => {
     const width = 500;
     const height = 600;
@@ -9,20 +12,26 @@ export default function BlurredLoginModal({ onClose }) {
     const top = window.screen.height / 2 - height / 2;
 
     const popup = window.open(
-      `/oauth2/authorization/${provider}`, // 프록시를 통해 요청
+      `/oauth2/authorization/${provider}`,
       `${provider} Login`,
       `width=${width},height=${height},left=${left},top=${top}`
     );
 
-    const checkPopup = setInterval(() => {
+    const checkPopup = setInterval(async () => {
       if (popup.closed) {
         clearInterval(checkPopup);
+        try {
+          await login();
+          if (typeof onLoginSuccess === "function") {
+            onLoginSuccess();
+          }
+        } catch (error) {
+          console.error(error);
+        }
         onClose();
-        window.location.reload();
       }
     }, 1000);
   };
-
   return (
     <div className="modal-overlay">
       <div className="card">

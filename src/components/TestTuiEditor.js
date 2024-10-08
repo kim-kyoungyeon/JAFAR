@@ -1,13 +1,14 @@
 import React, { useState, useRef, useEffect } from "react";
 import ImageEditor from "@toast-ui/react-image-editor";
 import "tui-image-editor/dist/tui-image-editor.css";
-import withLogin from "./withLogin";
+import withLogin from "../hoc/withLogin";
+import useAuth from "../utils/useAuth";
 import "../styles/editor.css";
 import BlurredLoginModal from "../components/BlurredLoginModal";
-import sampleLogo from "../styles/sampleLogo.jpg";
-import axios from "axios"; // axios를 직접 import
+import axiosInstance from "../utils/axiosConfig";
 
 const FASTAPI_URL = "http://3.35.166.17:8000"; // FastAPI 서버 주소
+const API_URL = process.env.REACT_APP_API_URL;
 
 const TestTuiEditor = ({
   isLoggedIn,
@@ -21,6 +22,7 @@ const TestTuiEditor = ({
   const [recommendedImages, setRecommendedImages] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [showLoginModal, setShowLoginModal] = useState(false);
+  const { isAuthenticated, logout } = useAuth();
 
   useEffect(() => {
     let timeoutId;
@@ -97,9 +99,12 @@ const TestTuiEditor = ({
     }
     setIsLoading(true);
     try {
-      const response = await axios.post(`${FASTAPI_URL}/generate-images`, {
-        prompt,
-      });
+      const response = await axiosInstance.post(
+        `${FASTAPI_URL}/generate-images`,
+        {
+          prompt,
+        }
+      );
       setRecommendedImages(response.data.images);
     } catch (error) {
       console.error("Error generating images:", error);
@@ -121,7 +126,7 @@ const TestTuiEditor = ({
     <div className="editor-container">
       <div className="main-content">
         <header className="header">
-          <img src={sampleLogo} width="50px" alt="Sample Logo" />
+          <img src="/sampleLogo.jpg" width="50px" alt="Sample Logo" />
           <div className="header-buttons">
             <button
               className="button"
@@ -208,7 +213,12 @@ const TestTuiEditor = ({
           </div>
         ))}
       </div>
-      {showLoginModal && <BlurredLoginModal onClose={handleCloseModal} />}
+      {showLoginModal && (
+        <BlurredLoginModal
+          onClose={handleCloseModal}
+          onLoginSuccess={handleLoginSuccess}
+        />
+      )}
     </div>
   );
 };

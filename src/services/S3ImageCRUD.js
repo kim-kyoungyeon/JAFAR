@@ -46,7 +46,7 @@ const S3ImageCRUD = () => {
     formData.append("file", selectedFile);
 
     try {
-      const response = await api.post(`${baseUrl}/upload`, formData, {
+      const response = await api.post(`${baseUrl}/save`, formData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
