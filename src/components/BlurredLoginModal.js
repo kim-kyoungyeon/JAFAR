@@ -9,7 +9,7 @@ export default function BlurredLoginModal({ onClose }) {
     const top = window.screen.height / 2 - height / 2;
 
     const popup = window.open(
-      `http://3.39.251.48:8080/oauth2/authorization/${provider}`,
+      `/oauth2/authorization/${provider}`, // 프록시를 통해 요청
       `${provider} Login`,
       `width=${width},height=${height},left=${left},top=${top}`
     );
@@ -31,12 +31,6 @@ export default function BlurredLoginModal({ onClose }) {
         </div>
         <div className="card-content">
           <div className="oauth-buttons">
-            <button
-              onClick={() => handleOAuthLogin("google")}
-              className="oauth-button google"
-            >
-              Google로 로그인
-            </button>
             <button
               onClick={() => handleOAuthLogin("naver")}
               className="oauth-button naver"

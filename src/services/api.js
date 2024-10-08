@@ -1,27 +1,30 @@
 import axios from "axios";
-import { getCookie, removeCookie } from "../utils/cookies";
-
-const API_URL = "http://3.39.251.48:8080";
 
 const api = axios.create({
-  baseURL: API_URL,
-  withCredentials: true, // CORS 관련 쿠키를 포함시킵니다.
+  baseURL: "/api", // 프록시를 사용하므로 상대 경로로 변경
+  withCredentials: true, // 쿠키를 포함하여 요청을 보냄
   headers: {
     "Content-Type": "application/json",
   },
 });
 
-api.interceptors.request.use((config) => {
-  const token = getCookie("jwt");
-  if (token) {
-    config.headers["Authorization"] = `Bearer ${token}`;
+// 요청 인터셉터는 제거 (쿠키는 자동으로 전송되므로)
+
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response && error.response.status === 401) {
+      // 인증에 실패한 경우
+      // 로그인 페이지로 리다이렉트하거나 다른 처리를 수행
+    }
+    return Promise.reject(error);
   }
-  return config;
-});
+);
 
 export const login = async (email, password) => {
   try {
     const response = await api.post("/login", { email, password });
+    // 서버에서 쿠키를 설정하므로 클라이언트에서 별도로 저장할 필요 없음
     return response.data;
   } catch (error) {
     throw error;
@@ -31,7 +34,7 @@ export const login = async (email, password) => {
 export const logout = async () => {
   try {
     await api.post("/logout");
-    removeCookie("jwt");
+    // 서버에서 쿠키를 삭제하므로 클라이언트에서 별도로 처리할 필요 없음
   } catch (error) {
     throw error;
   }

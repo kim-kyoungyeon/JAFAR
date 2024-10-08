@@ -1,8 +1,8 @@
 {
   "name": "jafar_front",
   "version": "0.1.0",
+  "proxy": "http://3.39.251.48",
   "private": true,
-  "proxy": "http://3.39.251.48:8080",
   "dependencies": {
     "@toast-ui/editor": "^3.2.2",
     "@toast-ui/react-image-editor": "^3.15.2",
