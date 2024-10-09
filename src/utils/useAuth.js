@@ -1,42 +1,55 @@
-import { useState, useEffect } from "react";
-import axiosInstance from "./axiosConfig";
+import { useState, useEffect, useCallback } from 'react';
+import axiosInstance from './axiosConfig';
 
 const useAuth = () => {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [username, setUsername] = useState("");
 
-  const checkAuthStatus = async () => {
+   const checkAuthStatus = useCallback(async () => {
     try {
-      await axiosInstance.get("/api/check-auth");
-      setIsAuthenticated(true);
+      const response = await axiosInstance.get('/api/check-auth');
+      setIsLoggedIn(response.data.isAuthenticated);
+      setUsername(response.data.username || "");
+      return response.data.isAuthenticated;
     } catch (error) {
-      setIsAuthenticated(false);
+      console.error('Error checking auth status:', error);
+      setIsLoggedIn(false);
+      setUsername("");
+      return false;
     }
-  };
-
-  useEffect(() => {
-    checkAuthStatus();
   }, []);
 
-  const login = async () => {
-    // OAuth 로그인 처리 후
+   useEffect(() => {
+    checkAuthStatus();
+  }, [checkAuthStatus]);
+
+   const handleLoginSuccess = useCallback(async () => {
     await checkAuthStatus();
-  };
+  }, [checkAuthStatus]);
 
-  const logout = async () => {
+  const login = useCallback(async () => {
     try {
-      await axiosInstance.post("/api/logout");
-      setIsAuthenticated(false);
+      const isAuthenticated = await checkAuthStatus();
+      if (!isAuthenticated) {
+        throw new Error('Authentication failed');
+      }
     } catch (error) {
-      console.error("로그아웃 실패:", error);
+      console.error('Login error:', error);
+      throw error;
     }
-  };
+  }, [checkAuthStatus]);
 
-  return {
-    isAuthenticated,
-    login,
-    logout,
-    checkAuthStatus,
-  };
+   const logout = useCallback(async () => {
+    try {
+      await axiosInstance.post('/logout');
+      setIsLoggedIn(false);
+      setUsername("");
+    } catch (error) {
+      console.error('Logout error:', error);
+    }
+  }, []);
+
+  return { isLoggedIn, username, handleLoginSuccess, logout, checkAuthStatus };
 };
 
 export default useAuth;

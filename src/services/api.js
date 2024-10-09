@@ -19,6 +19,7 @@ export const login = async (email, password) => {
   try {
     const response = await api.post("/login", { email, password });
     // 서버에서 쿠키를 설정하므로 클라이언트에서 별도로 저장할 필요 없음
+
     return response.data;
   } catch (error) {
     throw error;

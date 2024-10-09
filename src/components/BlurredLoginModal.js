@@ -1,36 +1,51 @@
 import React from "react";
 import "../styles/BlurredLoginModal.css";
+import { clearAllCookies } from "../utils/cookies";
 import useAuth from "../utils/useAuth";
 
-export default function BlurredLoginModal({ onClose, onLoginSuccess }) {
+export default function BlurredLoginModal({ onClose }) {
   const { login } = useAuth();
 
   const handleOAuthLogin = (provider) => {
+    clearAllCookies();
+ 
     const width = 500;
     const height = 600;
     const left = window.screen.width / 2 - width / 2;
     const top = window.screen.height / 2 - height / 2;
 
+    const authUrl = `http://3.39.251.48:8080/oauth2/authorization/${provider}`;
+
     const popup = window.open(
-      `/oauth2/authorization/${provider}`,
+      authUrl,
       `${provider} Login`,
       `width=${width},height=${height},left=${left},top=${top}`
     );
 
-    const checkPopup = setInterval(async () => {
+    const checkPopup = setInterval(() => {
       if (popup.closed) {
         clearInterval(checkPopup);
-        try {
-          await login();
-          if (typeof onLoginSuccess === "function") {
-            onLoginSuccess();
-          }
-        } catch (error) {
-          console.error(error);
-        }
-        onClose();
+        // Check if the user is authenticated after the popup is closed
+        checkAuthStatus();
       }
     }, 1000);
+  };
+
+
+
+ const checkAuthStatus = async () => {
+    try {
+      const response = await fetch('http://3.39.251.48:8080/api/check-auth', {
+        credentials: 'include'
+      });
+      const data = await response.json();
+      if (data.isAuthenticated) {
+        onLoginSuccess();
+        onClose();
+      }
+    } catch (error) {
+      console.error('Error checking auth status:', error);
+    }
   };
   return (
     <div className="modal-overlay">

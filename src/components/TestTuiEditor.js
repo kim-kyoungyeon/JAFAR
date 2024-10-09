@@ -1,60 +1,58 @@
 import React, { useState, useRef, useEffect } from "react";
 import ImageEditor from "@toast-ui/react-image-editor";
 import "tui-image-editor/dist/tui-image-editor.css";
-import withLogin from "../hoc/withLogin";
 import useAuth from "../utils/useAuth";
 import "../styles/editor.css";
 import BlurredLoginModal from "../components/BlurredLoginModal";
 import axiosInstance from "../utils/axiosConfig";
 
-const FASTAPI_URL = "http://3.35.166.17:8000"; // FastAPI 서버 주소
-const API_URL = process.env.REACT_APP_API_URL;
 
-const TestTuiEditor = ({
-  isLoggedIn,
-  username,
-  handleLogout,
-  handleLoginSuccess,
-}) => {
+const FASTAPI_URL = "";
+
+
+const TestTuiEditor = () => {
+  const { isLoggedIn, username, handleLoginSuccess, logout } = useAuth();
+  const [showLoginModal, setShowLoginModal] = useState(false);
+
   const editorRef = useRef(null);
   const [editorInstance, setEditorInstance] = useState(null);
   const [prompt, setPrompt] = useState("");
   const [recommendedImages, setRecommendedImages] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [showLoginModal, setShowLoginModal] = useState(false);
-  const { isAuthenticated, logout } = useAuth();
 
-  useEffect(() => {
-    let timeoutId;
-    const initializeEditor = () => {
-      if (editorRef.current) {
+   useEffect(() => {
+    let isMounted = true;
+    let retryCount = 0;
+    const maxRetries = 3;
+    
+    const initializeEditor = async () => {
+      if (editorRef.current && isMounted) {
         try {
           const instance = editorRef.current.getInstance();
           setEditorInstance(instance);
-          console.log("Editor instance initialized:", instance);
+          
+          // Wait for the editor instance to fully load
+          await new Promise((resolve) => setTimeout(resolve, 500));
 
-          // 초기 이미지 로드
-          instance
-            .loadImageFromURL(
-              "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7",
-              "blank"
-            )
-            .then(() => console.log("Initial image loaded"))
-            .catch((err) => console.error("Error loading initial image:", err));
+          await instance.loadImageFromURL(
+            "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7",
+            "blank"
+          );
+          console.log("Editor initialized successfully");
         } catch (error) {
           console.error("Error initializing editor:", error);
-          timeoutId = setTimeout(initializeEditor, 100);
+          if (retryCount < maxRetries) {
+            retryCount++;
+            console.log(`Retrying initialization (${retryCount}/${maxRetries})...`);
+            setTimeout(initializeEditor, 1000);
+          }
         }
-      } else {
-        timeoutId = setTimeout(initializeEditor, 100);
       }
     };
     initializeEditor();
 
     return () => {
-      if (timeoutId) {
-        clearTimeout(timeoutId);
-      }
+      isMounted = false;
     };
   }, []);
 
@@ -68,12 +66,7 @@ const TestTuiEditor = ({
       reader.onload = (e) => {
         const imageUrl = e.target.result;
         if (editorInstance) {
-          editorInstance
-            .loadImageFromURL(imageUrl, "uploaded")
-            .then(() => console.log("Image uploaded successfully"))
-            .catch((err) => console.error("Error uploading image:", err));
-        } else {
-          console.error("Editor instance is not available");
+          editorInstance.loadImageFromURL(imageUrl, "uploaded");
         }
       };
       reader.readAsDataURL(file);
@@ -88,22 +81,20 @@ const TestTuiEditor = ({
       link.download = "edited-image.png";
       link.href = dataURL;
       link.click();
-    } else {
-      console.error("Editor instance is not available");
     }
   };
-  const handleGenerateImages = async () => {
+
+    const handleGenerateImages = async () => {
     if (!prompt) {
       alert("프롬프트를 입력해주세요.");
       return;
     }
-    setIsLoading(true);
+      setIsLoading(true);
+      
     try {
       const response = await axiosInstance.post(
         `${FASTAPI_URL}/generate-images`,
-        {
-          prompt,
-        }
+        { prompt }
       );
       setRecommendedImages(response.data.images);
     } catch (error) {
@@ -114,46 +105,33 @@ const TestTuiEditor = ({
     }
   };
 
-  const handleLoginClick = () => {
-    setShowLoginModal(true); // 로그인 버튼 클릭 시 모달 표시
+      const handleLogin = () => {
+    setShowLoginModal(true);
   };
 
-  const handleCloseModal = () => {
-    setShowLoginModal(false); // 모달 닫기
+    const handleCloseModal = () => {
+    setShowLoginModal(false);
   };
-
   return (
     <div className="editor-container">
       <div className="main-content">
         <header className="header">
           <img src="/sampleLogo.jpg" width="50px" alt="Sample Logo" />
           <div className="header-buttons">
-            <button
-              className="button"
-              onClick={handleUpload}
-              disabled={!editorInstance}
-            >
+            <button onClick={handleUpload} disabled={!editorInstance}>
               Load
             </button>
-            <button
-              className="button"
-              onClick={handleDownload}
-              disabled={!editorInstance}
-            >
+            <button onClick={handleDownload} disabled={!editorInstance}>
               Download
             </button>
-            <button className="button">Save</button>
+            <button>Save</button>
           </div>
-          <div className="header-buttons">
-            <button className="button">내보내기</button>
+           <div className="header-buttons">
+            <button>내보내기</button>
             {isLoggedIn ? (
-              <button className="button" onClick={handleLogout}>
-                Logout ({username})
-              </button>
+              <button onClick={logout}>Logout ({username})</button>
             ) : (
-              <button className="button" onClick={handleLoginClick}>
-                Login
-              </button>
+              <button onClick={handleLogin}>Login</button>
             )}
           </div>
         </header>
@@ -200,12 +178,8 @@ const TestTuiEditor = ({
           onChange={(e) => setPrompt(e.target.value)}
           placeholder="프롬프트 입력"
         />
-        <button
-          className="button"
-          onClick={handleGenerateImages}
-          disabled={isLoading}
-        >
-          {isLoggedIn ? "생성 중..." : "이미지 생성"}
+        <button onClick={handleGenerateImages} disabled={isLoading}>
+          {isLoading ? "생성 중..." : "이미지 생성"}
         </button>
         {recommendedImages.map((image, index) => (
           <div key={index} className="image-preview">
@@ -214,8 +188,8 @@ const TestTuiEditor = ({
         ))}
       </div>
       {showLoginModal && (
-        <BlurredLoginModal
-          onClose={handleCloseModal}
+        <BlurredLoginModal 
+          onClose={handleCloseModal} 
           onLoginSuccess={handleLoginSuccess}
         />
       )}
@@ -223,4 +197,4 @@ const TestTuiEditor = ({
   );
 };
 
-export default withLogin(TestTuiEditor);
+export default TestTuiEditor;
