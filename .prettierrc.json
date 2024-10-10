@@ -1,8 +1,0 @@
-{
-  "overrides": [
-    {
-      "files": ".github/workflows/*.yml",
-      "options": { "parser": "yaml" }
-    }
-  ]
-}

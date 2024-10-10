@@ -1,7 +1,0 @@
-{
-  "yaml.format.enable": false,
-  "[yaml]": {
-    "editor.formatOnSave": false,
-    "editor.defaultFormatter": null
-  }
-}
