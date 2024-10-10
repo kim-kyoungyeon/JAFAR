@@ -69,6 +69,12 @@ p {
   color: #e6e6fa;
 }
 
+svg.modal-logo {
+  font-family: initial;
+  color: initial;
+  fill: initial;
+}
+
 /* Button styles */
 .button {
   background-color: #ffd700;

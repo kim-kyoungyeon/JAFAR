@@ -53,7 +53,18 @@ export default function BlurredLoginModal({ onClose ,onLoginSuccess }) {
       <div className="card">
         <div className="card-header">
           <h2 className="card-title">소셜 로그인</h2>
-            <Logo className="modal-logo" width="84" height="10" />
+             <Logo
+  className="modal-logo"
+  width="84"
+  height="10"
+  style={{
+    position: 'absolute',
+    top: '10px',
+    left: '10px',
+    width: '84px',
+    height: '10px'
+  }}
+/>
         </div>
         <div className="card-content">
           <div className="oauth-buttons">
