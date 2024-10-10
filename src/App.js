@@ -4,7 +4,7 @@ import "./styles/App.css";
 import "./styles/BlurredLoginModal.css";
 import TestTuiEditor from "./components/TestTuiEditor";
 import S3ImageCRUD from "./services/S3ImageCRUD";
-
+// import S3Direct from "./components/S3Direct"
 function App() {
   return (
     <Router>
@@ -20,6 +20,7 @@ function App() {
                 <>
                   <TestTuiEditor />
                   <S3ImageCRUD />
+                  {/* <S3Direct/> */}
                 </>
               }
             />

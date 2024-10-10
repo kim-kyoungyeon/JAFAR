@@ -2,17 +2,12 @@
   "short_name": "React App",
   "name": "Create React App Sample",
 
-  "content_scripts": [
-    {
-      "matches": ["<all_urls>"],
-      "js": ["contentScript.js"]
-    }
-  ],
+ 
   "icons": [
     {
-      "src": "sampleLogo.jpg",
-      "type": "image/jpg",
-      "sizes": "512x512"
+      "src": "logo%20svg.svg",
+      "type": "image/svg+xml",
+      "sizes": "any"
     }
   ],
   "start_url": ".",

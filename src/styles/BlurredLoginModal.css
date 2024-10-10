@@ -27,9 +27,21 @@
 }
 
 /* Card Header */
-.card-header {
-  margin-bottom: 1rem;
-  text-align: center;
+.modal-logo {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  width: 84px; /* Logo 컴포넌트에서 지정한 너비와 일치 */
+  height: 10px; /* Logo 컴포넌트에서 지정한 높이와 일치 */
+}
+
+
+.modal-logo {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  width: 1px; /* 로고의 너비 조정 */
+  height: auto; /* 높이는 자동으로 조정되도록 설정 */
 }
 
 .card-title {

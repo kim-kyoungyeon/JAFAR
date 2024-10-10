@@ -3,6 +3,9 @@ import axios from "axios";
 const axiosInstance = axios.create({
   withCredentials: true, // 쿠키를 포함하여 요청을 보냄
   baseURL: "http://3.39.251.48:8080", // API 요청의 기본 URL 설정
+   headers: {
+    'Content-Type': 'application/json',
+  }
 });
 
 axiosInstance.interceptors.response.use(

@@ -4,58 +4,57 @@ import "tui-image-editor/dist/tui-image-editor.css";
 import useAuth from "../utils/useAuth";
 import "../styles/editor.css";
 import BlurredLoginModal from "../components/BlurredLoginModal";
-import axiosInstance from "../utils/axiosConfig";
-import Logo from '../components/Logo';
+import axios from 'axios';
+import Logo from '/logo svg.svg';
 
-const FASTAPI_URL = "";
+const S3_BUCKET_URL = "https://jafar-jv-s-buckett.s3.ap-northeast-2.amazonaws.com";
 
-
-const TestTuiEditor = () => {
+const S3Direct = () => {
   const { isLoggedIn, username, handleLoginSuccess, logout } = useAuth();
   const [showLoginModal, setShowLoginModal] = useState(false);
-
   const editorRef = useRef(null);
   const [editorInstance, setEditorInstance] = useState(null);
   const [prompt, setPrompt] = useState("");
-  const [recommendedImages, setRecommendedImages] = useState([]);
+  const [s3Images, setS3Images] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
-
-   useEffect(() => {
-    let isMounted = true;
-    let retryCount = 0;
-    const maxRetries = 3;
     
-    const initializeEditor = async () => {
-      if (editorRef.current && isMounted) {
-        try {
-          const instance = editorRef.current.getInstance();
-          setEditorInstance(instance);
-          
-          // Wait for the editor instance to fully load
-          await new Promise((resolve) => setTimeout(resolve, 500));
-
-          await instance.loadImageFromURL(
-            "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7",
-            "blank"
-          );
-          console.log("Editor initialized successfully");
-        } catch (error) {
-          console.error("Error initializing editor:", error);
-          if (retryCount < maxRetries) {
-            retryCount++;
-            console.log(`Retrying initialization (${retryCount}/${maxRetries})...`);
-            setTimeout(initializeEditor, 1000);
-          }
-        }
-      }
-    };
-    initializeEditor();
-
-    return () => {
-      isMounted = false;
-    };
+    useEffect(() => {
+        fetchS3Images();
+    }, []);
+        
+    useEffect(() => {
+    if (editorRef.current) {
+      setEditorInstance(editorRef.current.getInstance());
+    }
   }, []);
 
+  const fetchS3Images = async () => {
+    setIsLoading(true);
+    try {
+      const response = await axios.get(`${S3_BUCKET_URL}?list-type=2`);
+      const parser = new DOMParser();
+      const xmlDoc = parser.parseFromString(response.data, "text/xml");
+      const contents = xmlDoc.getElementsByTagName('Contents');
+      
+      const images = Array.from(contents).map(content => {
+      const key = content.getElementsByTagName('Key')[0].textContent;
+      return {
+            name: key.split('/').pop(),
+            url: `${S3_BUCKET_URL}/${encodeURIComponent(key)}`
+        };
+        });
+
+
+      setS3Images(images);
+    } catch (error) {
+      console.error("Error fetching S3 images:", error);
+      alert("이미지를 불러오는 데 실패했습니다.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+    
   const handleUpload = () => {
     const uploadInput = document.createElement("input");
     uploadInput.type = "file";
@@ -74,6 +73,7 @@ const TestTuiEditor = () => {
     uploadInput.click();
   };
 
+
   const handleDownload = () => {
     if (editorInstance) {
       const dataURL = editorInstance.toDataURL();
@@ -83,50 +83,39 @@ const TestTuiEditor = () => {
       link.click();
     }
   };
+    
 
   const handleGenerateImages = async () => {
-    if (!prompt) {
-      alert("프롬프트를 입력해주세요.");
-      return;
-    }
-    setIsLoading(true);
-    
-    try {
-      const response = await axiosInstance.post(
-        `/api/generate-image`,
-        { prompt },
-        { responseType: 'arraybuffer' }
-      );
-      
-      const blob = new Blob([response.data], { type: 'image/png' });
-      const imageUrl = URL.createObjectURL(blob);
-      
-      setRecommendedImages([imageUrl]);
-      
-      // 생성된 이미지를 에디터에 로드
-      if (editorInstance) {
-        editorInstance.loadImageFromURL(imageUrl, "generated");
-      }
-    } catch (error) {
-      console.error("Error generating image:", error);
-      alert("이미지 생성 중 오류가 발생했습니다.");
-    } finally {
-      setIsLoading(false);
-    }
+    await fetchS3Images();
   };
 
-      const handleLogin = () => {
+  const handleLogin = () => {
     setShowLoginModal(true);
   };
 
-    const handleCloseModal = () => {
+  const handleCloseModal = () => {
     setShowLoginModal(false);
   };
+    
+    const handleImageClick = (imageUrl) => {
+    if (editorInstance) {
+      editorInstance.loadImageFromURL(imageUrl, "selectedImage")
+        .then(() => {
+          console.log('Image loaded successfully');
+        })
+        .catch((err) => {
+          console.error('Failed to load image:', err);
+        });
+    } else {
+      console.error('Editor instance is not available');
+    }
+  };
+
   return (
     <div className="editor-container">
       <div className="main-content">
-        <header className="header">
-          <Logo className="modal-logo" />
+              <header className="header"> 
+        <Logo className="modal-logo" width="100" height="30" />
           <div className="header-buttons">
             <button onClick={handleUpload} disabled={!editorInstance}>
               Load
@@ -144,7 +133,7 @@ const TestTuiEditor = () => {
               <button onClick={handleLogin}>Login</button>
             )}
           </div>
-        </header>
+              </header>
         <ImageEditor
           ref={editorRef}
           includeUI={{
@@ -180,22 +169,24 @@ const TestTuiEditor = () => {
         />
       </div>
       <div className="right-sidebar">
-        <h3>생성형 이미지 추천</h3>
-        <p>사진과 유사한 생성형 이미지를 추천합니다.</p>
+        <h3>S3 이미지 목록</h3>
         <input
           type="text"
           value={prompt}
           onChange={(e) => setPrompt(e.target.value)}
-          placeholder="프롬프트 입력"
+        className="prompt-input"
+        placeholder="프롬프트 입력"
         />
-        <button onClick={handleGenerateImages} disabled={isLoading}>
-          {isLoading ? "생성 중..." : "이미지 생성"}
+        <button  className="refresh-button" onClick={handleGenerateImages} disabled={isLoading}>
+          {isLoading ? "불러오는 중..." : "이미지 목록 새로고침"}
         </button>
-        {recommendedImages.map((image, index) => (
-          <div key={index} className="image-preview">
-            <img src={image} alt={`Generated image ${index + 1}`} />
-          </div>
-        ))}
+        <div className="image-list">
+          {s3Images.map((image, index) => (
+            <div key={index} className="image-preview" onClick={() => handleImageClick(image.url)}>
+              <img src={image.url} alt={image.name} />
+            </div>
+          ))}
+        </div>
       </div>
       {showLoginModal && (
         <BlurredLoginModal 
@@ -206,5 +197,4 @@ const TestTuiEditor = () => {
     </div>
   );
 };
-
-export default TestTuiEditor;
+export default S3Direct;

@@ -5,7 +5,7 @@ const useAuth = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [username, setUsername] = useState("");
 
-   const checkAuthStatus = useCallback(async () => {
+     const checkAuthStatus = useCallback(async () => {
     try {
       const response = await axiosInstance.get('/api/check-auth');
       setIsLoggedIn(response.data.isAuthenticated);

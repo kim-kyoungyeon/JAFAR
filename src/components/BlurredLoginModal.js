@@ -2,8 +2,9 @@ import React from "react";
 import "../styles/BlurredLoginModal.css";
 import { clearAllCookies } from "../utils/cookies";
 import useAuth from "../utils/useAuth";
+import Logo from "./Logo"; // Logo 컴포넌트를 import
 
-export default function BlurredLoginModal({ onClose }) {
+export default function BlurredLoginModal({ onClose ,onLoginSuccess }) {
   const { login } = useAuth();
 
   const handleOAuthLogin = (provider) => {
@@ -52,6 +53,7 @@ export default function BlurredLoginModal({ onClose }) {
       <div className="card">
         <div className="card-header">
           <h2 className="card-title">소셜 로그인</h2>
+            <Logo className="modal-logo" width="84" height="10" />
         </div>
         <div className="card-content">
           <div className="oauth-buttons">

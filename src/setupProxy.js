@@ -8,7 +8,9 @@ module.exports = function (app) {
       changeOrigin: true,
       onProxyRes: function (proxyRes, req, res) {
         // CORS 헤더 설정
-        proxyRes.headers["Access-Control-Allow-Origin"] = "http://43.203.233.134:3000";
+        //proxyRes.headers["Access-Control-Allow-Origin"] = "http://43.203.233.134:3000";
+        proxyRes.headers["Access-Control-Allow-Origin"] = "http://43.203.233.134:8888"; // 포트를 80으로 변경
+
         proxyRes.headers["Access-Control-Allow-Credentials"] = "true";
         
         // 쿠키 SameSite 속성 설정

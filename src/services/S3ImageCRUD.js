@@ -15,7 +15,7 @@ const S3ImageCRUD = () => {
     setIsLoading(true);
     setError(null);
     try {
-      const response = await api.get("/pictures/list");
+      const response = await api.get("/pictures");
       setFileList(Array.isArray(response.data) ? response.data : []);
     } catch (error) {
       console.error("Error fetching file list:", error);
