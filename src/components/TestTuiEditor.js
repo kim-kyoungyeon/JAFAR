@@ -11,7 +11,7 @@ const FASTAPI_URL = "";
 
 
 const TestTuiEditor = () => {
-  const { isLoggedIn, username, handleLoginSuccess, logout } = useAuth();
+  const { isLoggedIn, username, handleLoginSuccess, logout, checkAuthStatus } = useAuth();
   const [showLoginModal, setShowLoginModal] = useState(false);
 
   const editorRef = useRef(null);
@@ -115,13 +115,15 @@ const TestTuiEditor = () => {
     }
   };
 
-      const handleLogin = () => {
+  const handleLogin = () => {
     setShowLoginModal(true);
   };
 
-    const handleCloseModal = () => {
+  const handleCloseModal = async () => {
     setShowLoginModal(false);
+    await checkAuthStatus();
   };
+
   return (
     <div className="editor-container">
       <div className="main-content">
