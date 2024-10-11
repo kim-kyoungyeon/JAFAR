@@ -1,26 +1,18 @@
 import React, { useState, useRef, useEffect } from "react";
 import ImageEditor from "@toast-ui/react-image-editor";
 import "tui-image-editor/dist/tui-image-editor.css";
-import useAuth from "../utils/useAuth";
 import "../styles/editor.css";
-import BlurredLoginModal from "../components/BlurredLoginModal";
 import axiosInstance from "../utils/axiosConfig";
 import Logo from '../components/Logo';
 
-const FASTAPI_URL = "";
-
-
-const TestTuiEditor = () => {
-  const { isLoggedIn, username, handleLoginSuccess, logout } = useAuth();
-  const [showLoginModal, setShowLoginModal] = useState(false);
-
+const TestTuiEditor = ({ isLoggedIn, username, onLoginClick, onLogout }) => {
   const editorRef = useRef(null);
   const [editorInstance, setEditorInstance] = useState(null);
   const [prompt, setPrompt] = useState("");
   const [recommendedImages, setRecommendedImages] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
 
-   useEffect(() => {
+  useEffect(() => {
     let isMounted = true;
     let retryCount = 0;
     const maxRetries = 3;
@@ -31,7 +23,6 @@ const TestTuiEditor = () => {
           const instance = editorRef.current.getInstance();
           setEditorInstance(instance);
           
-          // Wait for the editor instance to fully load
           await new Promise((resolve) => setTimeout(resolve, 500));
 
           await instance.loadImageFromURL(
@@ -103,7 +94,6 @@ const TestTuiEditor = () => {
       
       setRecommendedImages([imageUrl]);
       
-      // 생성된 이미지를 에디터에 로드
       if (editorInstance) {
         editorInstance.loadImageFromURL(imageUrl, "generated");
       }
@@ -115,13 +105,6 @@ const TestTuiEditor = () => {
     }
   };
 
-      const handleLogin = () => {
-    setShowLoginModal(true);
-  };
-
-    const handleCloseModal = () => {
-    setShowLoginModal(false);
-  };
   return (
     <div className="editor-container">
       <div className="main-content">
@@ -136,12 +119,12 @@ const TestTuiEditor = () => {
             </button>
             <button>Save</button>
           </div>
-           <div className="header-buttons">
+          <div className="header-buttons">
             <button>내보내기</button>
             {isLoggedIn ? (
-              <button onClick={logout}>Logout ({username})</button>
+              <button onClick={onLogout}>Logout ({username})</button>
             ) : (
-              <button onClick={handleLogin}>Login</button>
+              <button onClick={onLoginClick}>Login</button>
             )}
           </div>
         </header>
@@ -197,12 +180,6 @@ const TestTuiEditor = () => {
           </div>
         ))}
       </div>
-      {showLoginModal && (
-        <BlurredLoginModal 
-          onClose={handleCloseModal} 
-          onLoginSuccess={handleLoginSuccess}
-        />
-      )}
     </div>
   );
 };
