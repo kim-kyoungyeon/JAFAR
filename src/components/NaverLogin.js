@@ -9,7 +9,7 @@ const NaverLogin = ({ onSuccess, onFailure }) => {
       isPopup: false,
       loginButton: { color: "white", type: 5, height: 15 },
     });
-
+    3;
     naverLogin.init();
 
     naverLogin.getLoginStatus((status) => {
