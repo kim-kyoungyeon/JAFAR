@@ -1,25 +1,18 @@
-const { S3Client, ListObjectsV2Command } = require("@aws-sdk/client-s3");
 const express = require("express");
 const cors = require("cors");
 const path = require("path");
-const fetch = require("node-fetch"); // node-fetch를 추가해야 합니다.
+const { S3Client, ListObjectsV2Command } = require("@aws-sdk/client-s3");
 
 const app = express();
 
 // CORS 설정
-app.use(
-  cors({
-    origin:
-      process.env.NODE_ENV === "production"
-        ? "http://43.203.233.134:3000"
-        : "http://localhost:3000",
-    methods: ["GET", "POST", "PUT", "DELETE"],
-    allowedHeaders: ["Content-Type", "Authorization"],
-  })
-);
+app.use(cors());
 
-// body parser 미들웨어 추가
+// JSON 파싱 미들웨어
 app.use(express.json());
+
+// 정적 파일 제공 (React 빌드 파일)
+app.use(express.static(path.join(__dirname, "build")));
 
 // AWS S3 설정
 const s3 = new S3Client({
@@ -52,36 +45,9 @@ app.get("/api/images", async (req, res) => {
   }
 });
 
-app.get("/api/image-proxy", async (req, res) => {
-  const { url } = req.query;
-
-  if (!url) {
-    return res.status(400).json({ error: "URL parameter is required" });
-  }
-
-  try {
-    const response = await fetch(url);
-    const contentType = response.headers.get("content-type");
-    res.setHeader("Content-Type", contentType);
-    response.body.pipe(res);
-  } catch (error) {
-    console.error("Error proxying image:", error);
-    res.status(500).json({ error: "Failed to proxy image" });
-  }
-});
-
-// 정적 파일 제공 (프로덕션 모드)
-if (process.env.NODE_ENV === "production") {
-  app.use(express.static(path.join(__dirname, "build")));
-  app.get("*", (req, res) => {
-    res.sendFile(path.join(__dirname, "build", "index.html"));
-  });
-}
-
-// 에러 핸들링 미들웨어
-app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(500).send("Something broke!");
+// 모든 요청을 React 앱으로 라우팅
+app.get("*", (req, res) => {
+  res.sendFile(path.join(__dirname, "build", "index.html"));
 });
 
 const PORT = process.env.PORT || 3002;

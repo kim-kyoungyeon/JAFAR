@@ -9,15 +9,6 @@
     "@toast-ui/react-image-editor": "^3.15.2",
     "ajv": "^8.17.1",
     "ajv-keywords": "^5.1.0",
-<<<<<<< Updated upstream
-=======
-    "axios": "^1.7.7",
-    "cors": "^2.8.5",
-    "express": "^4.21.1",
-    "http-proxy-middleware": "^3.0.3",
-    "js-cookie": "^3.0.5",
-    "jwt-decode": "3.1.2",
->>>>>>> Stashed changes
     "lucide-react": "^0.447.0",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
@@ -26,11 +17,7 @@
     "web-vitals": "^2.1.4"
   },
   "scripts": {
-<<<<<<< Updated upstream
     "start": "react-scripts start",
-=======
-    "start": "cross-env PORT=3000  react-scripts start",
->>>>>>> Stashed changes
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
