@@ -1,3 +1,4 @@
+ 
 import {React, useEffect} from "react";
 import "../styles/BlurredLoginModal.css";
 import { clearAllCookies } from "../utils/cookies";
@@ -12,9 +13,9 @@ export default function BlurredLoginModal({ onClose, onLoginSuccess }) {
     clearAllCookies();
     const authUrl = `http://localhost:8080/oauth2/authorization/${provider}`;
     window.location.href = authUrl;
+ 
   };
   
-
   // 로그인 성공 시
   const handleSuccess = async () => {
     await handleLoginSuccess();
@@ -73,7 +74,11 @@ export default function BlurredLoginModal({ onClose, onLoginSuccess }) {
             />
           </button>
         </div>
+ 
+ 
       </div>
     </div>
   );
-}
+};
+
+export default BlurredLoginModal;
