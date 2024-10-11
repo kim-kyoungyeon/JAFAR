@@ -5,7 +5,13 @@ import "../styles/editor.css";
 import axiosInstance from "../utils/axiosConfig";
 import Logo from '../components/Logo';
 
-const TestTuiEditor = ({ isLoggedIn, username, onLoginClick, onLogout }) => {
+const FASTAPI_URL = "";
+
+
+const TestTuiEditor = () => {
+  const { isLoggedIn, username, handleLoginSuccess, logout, checkAuthStatus } = useAuth();
+  const [showLoginModal, setShowLoginModal] = useState(false);
+
   const editorRef = useRef(null);
   const [editorInstance, setEditorInstance] = useState(null);
   const [prompt, setPrompt] = useState("");
@@ -103,6 +109,15 @@ const TestTuiEditor = ({ isLoggedIn, username, onLoginClick, onLogout }) => {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleLogin = () => {
+    setShowLoginModal(true);
+  };
+
+  const handleCloseModal = async () => {
+    setShowLoginModal(false);
+    await checkAuthStatus();
   };
 
   return (
