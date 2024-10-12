@@ -2,9 +2,21 @@ import React, { useState, useRef, useEffect } from "react";
 import ImageEditor from "@toast-ui/react-image-editor";
 import "tui-image-editor/dist/tui-image-editor.css";
 import "../styles/editor.css";
-import axiosInstance from "../utils/axiosConfig";
+import axios from "axios";
+import S3ImageRetrieval from "./S3ImageRetrieval";
 import Logo from "../components/Logo";
-import { S3Client, ListObjectsV2Command } from "@aws-sdk/client-s3";
+
+import { debounce } from "lodash";
+
+const API_URL =
+  process.env.NODE_ENV === "production"
+    ? process.env.REACT_APP_PROD_API_URL
+    : process.env.REACT_APP_DEV_API_URL;
+
+const api = axios.create({
+  baseURL: API_URL,
+  withCredentials: true,
+});
 
 const TestTuiEditor = ({ isLoggedIn, username, onLoginClick, onLogout }) => {
   const editorRef = useRef(null);
@@ -12,6 +24,7 @@ const TestTuiEditor = ({ isLoggedIn, username, onLoginClick, onLogout }) => {
   const [prompt, setPrompt] = useState("");
   const [recommendedImages, setRecommendedImages] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [searchKeyword, setSearchKeyword] = useState("");
 
   useEffect(() => {
     let isMounted = true;
@@ -24,13 +37,16 @@ const TestTuiEditor = ({ isLoggedIn, username, onLoginClick, onLogout }) => {
           const instance = editorRef.current.getInstance();
           setEditorInstance(instance);
 
-          await new Promise((resolve) => setTimeout(resolve, 500));
-
-          await instance.loadImageFromURL(
-            "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7",
-            "blank"
-          );
-          console.log("Editor initialized successfully");
+          await new Promise((resolve) => setTimeout(resolve, 1000));
+          if (instance && typeof instance.loadImageFromURL === "function") {
+            await instance.loadImageFromURL(
+              "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7",
+              "blank"
+            );
+            console.log("Editor initialized successfully");
+          } else {
+            throw new Error("Editor instance not properly initialized");
+          }
         } catch (error) {
           console.error("Error initializing editor:", error);
           if (retryCount < maxRetries) {
@@ -49,34 +65,6 @@ const TestTuiEditor = ({ isLoggedIn, username, onLoginClick, onLogout }) => {
       isMounted = false;
     };
   }, []);
-
-  const fetchImagesFromS3 = async (keyword) => {
-    const client = new S3Client({
-      region: process.env.REACT_APP_AWS_REGION,
-      credentials: {
-        accessKeyId: process.env.REACT_APP_AWS_ACCESS_KEY_ID,
-        secretAccessKey: process.env.REACT_APP_AWS_SECRET_ACCESS_KEY,
-      },
-    });
-    const params = {
-      Bucket: process.env.REACT_APP_S3_BUCKET_NAME,
-      Prefix: keyword,
-    };
-    try {
-      const command = new ListObjectsV2Command(params);
-      const data = await client.send(command);
-      return data.Contents
-        ? data.Contents.filter((object) => !object.Key.endsWith("/")) // 폴더 제외
-            .map(
-              (object) =>
-                `https://${params.Bucket}.s3.${process.env.REACT_APP_AWS_REGION}.amazonaws.com/${object.Key}`
-            )
-        : [];
-    } catch (error) {
-      console.error("Error fetching images from S3:", error);
-      return [];
-    }
-  };
 
   const handleUpload = () => {
     const uploadInput = document.createElement("input");
@@ -106,43 +94,43 @@ const TestTuiEditor = ({ isLoggedIn, username, onLoginClick, onLogout }) => {
     }
   };
 
-  const handleGenerateImages = async () => {
+  const handleImageSelect = async (imageUrl) => {
+    if (editorInstance) {
+      try {
+        const proxyUrl = `${API_URL}/api/image-proxy?url=${encodeURIComponent(
+          imageUrl
+        )}`;
+        await editorInstance.loadImageFromURL(proxyUrl, "selected");
+        editorInstance.clearUndoStack();
+        // 선택된 이미지 URL을 서버로 전송
+        const response = await api.post("/api/select-image", { imageUrl });
+        console.log("Image selection response:", response.data);
+      } catch (error) {
+        console.error("Error loading image:", error);
+        alert("이미지 로딩 중 오류가 발생했습니다.");
+      }
+    }
+  };
+
+  const debouncedHandleGenerateImages = debounce(async () => {
     if (!prompt) {
       alert("프롬프트를 입력해주세요.");
       return;
     }
     setIsLoading(true);
-
     try {
-      const response = await axiosInstance.post(
-        `/api/generate-image`,
-        { prompt },
-        { responseType: "arraybuffer" }
+      const response = await api.get(
+        `/api/images?keyword=${encodeURIComponent(prompt)}`
       );
-
-      const blob = new Blob([response.data], { type: "image/png" });
-      const imageUrl = URL.createObjectURL(blob);
-
-      setRecommendedImages([imageUrl]);
-
-      if (editorInstance) {
-        editorInstance
-          .loadImageFromURL(imageUrl, "generated")
-          .then(() => {
-            console.log("Image loaded successfully");
-          })
-          .catch((err) => {
-            console.error("Error loading image:", err);
-            alert("이미지 로딩 중 오류가 발생했습니다.");
-          });
-      }
+      setSearchKeyword(prompt);
+      setRecommendedImages(response.data);
     } catch (error) {
-      console.error("Error generating image:", error);
+      console.error("Error generating images:", error);
       alert("이미지 생성 중 오류가 발생했습니다.");
     } finally {
       setIsLoading(false);
     }
-  };
+  }, 300);
 
   return (
     <div className="editor-container">
@@ -200,6 +188,12 @@ const TestTuiEditor = ({ isLoggedIn, username, onLoginClick, onLogout }) => {
           }}
           usageStatistics={true}
           crossOrigin="anonymous"
+          customOptions={{
+            zoom: {
+              min: 0.1,
+              max: 5,
+            },
+          }}
         />
       </div>
       <div className="right-sidebar">
@@ -211,14 +205,14 @@ const TestTuiEditor = ({ isLoggedIn, username, onLoginClick, onLogout }) => {
           onChange={(e) => setPrompt(e.target.value)}
           placeholder="프롬프트 입력"
         />
-        <button onClick={handleGenerateImages} disabled={isLoading}>
+        <button onClick={debouncedHandleGenerateImages} disabled={isLoading}>
           {isLoading ? "처리 중..." : "이미지 검색/생성"}
         </button>
-        {recommendedImages.map((image, index) => (
-          <div key={index} className="image-preview">
-            <img src={image} alt={`Retrieved/Generated image ${index + 1}`} />
-          </div>
-        ))}
+        <S3ImageRetrieval
+          keyword={searchKeyword}
+          onImageSelect={handleImageSelect}
+          recommendedImages={recommendedImages}
+        />
       </div>
     </div>
   );
