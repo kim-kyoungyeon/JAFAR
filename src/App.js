@@ -44,20 +44,19 @@ function App() {
   return (
     <Router>
       <div className="app-container">
-        <div className="pattern-overlay"></div>
-        <div className="radial-gradient-1"></div>
-        <div className="radial-gradient-2"></div>
         <div className="content-container">
-          <header className="app-header">
+          <header className="app-header" style={{paddingBottom: '10px', position: 'relative'}}>
             <Logo className="app-logo" />
-            {isLoggedIn ? (
-              <>
-                <span>Welcome, {username}!</span>
-                <button onClick={handleLogout}>Logout</button>
-              </>
-            ) : (
-              <button onClick={handleOpenLoginModal}>Login</button>
-            )}
+            <div className="loginSection">
+              {isLoggedIn ? (
+                <>
+                  <span className="welcomeMessage">Welcome, {username}!</span>
+                  <button className="styledButton logoutButton" onClick={handleLogout}>Logout</button>
+                </>
+              ) : (
+                <button className="styledButton loginButton" onClick={handleOpenLoginModal}>Login</button>
+              )}
+            </div>
           </header>
           <Routes>
             <Route path="/" element={<TestTuiEditor />} />
