@@ -3,10 +3,10 @@ import {React, useEffect} from "react";
 import "../styles/BlurredLoginModal.css";
 import { clearAllCookies } from "../utils/cookies";
 import naverLoginButton from "../assets/naverLogin.png";
-import useAuth from "../utils/useAuth";
+import useAuth from "../hooks/useAuth";
 
 
-export default function BlurredLoginModal({ onClose, onLoginSuccess }) {
+export default function BlurredLoginModal({ onClose, onLoginSuccess,  }) {
   const { handleLoginSuccess } = useAuth();
 
   const handleOAuthLogin = async (provider) => {
@@ -80,5 +80,3 @@ export default function BlurredLoginModal({ onClose, onLoginSuccess }) {
     </div>
   );
 };
-
-export default BlurredLoginModal;

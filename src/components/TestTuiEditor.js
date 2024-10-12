@@ -4,12 +4,13 @@ import "tui-image-editor/dist/tui-image-editor.css";
 import "../styles/editor.css";
 import axiosInstance from "../utils/axiosConfig";
 import Logo from '../components/Logo';
+import useAuth from "../hooks/useAuth";
 
 const FASTAPI_URL = "";
 
 
 const TestTuiEditor = () => {
-  const { isLoggedIn, username, handleLoginSuccess, logout, checkAuthStatus } = useAuth();
+  const { isLoggedIn, username, handleLoginSuccess, logout, checkAuthStatus, onLogout, onLoginClick } = useAuth();
   const [showLoginModal, setShowLoginModal] = useState(false);
 
   const editorRef = useRef(null);

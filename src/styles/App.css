@@ -13,45 +13,17 @@ html {
 /* App container */
 .app-container {
   min-height: 100vh;
-  background: linear-gradient(to bottom right, #4a0e4e, #000000, #8b4513);
+  background-color: #000000;
   position: relative;
   overflow: hidden;
-}
-
-/* Pattern overlay */
-.pattern-overlay {
-  position: absolute;
-  inset: 0;
-  background-image: url("./pattern.svg");
-  opacity: 0.2;
-}
-
-/* Radial gradients */
-.radial-gradient-1 {
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(
-    circle,
-    rgba(128, 0, 128, 0.3) 0%,
-    transparent 70%
-  );
-}
-
-.radial-gradient-2 {
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(
-    circle,
-    rgba(255, 215, 0, 0.2) 0%,
-    transparent 70%
-  );
 }
 
 /* Content container */
 .content-container {
   position: relative;
   z-index: 1;
-  padding: 2rem;
+  padding-top: 2rem;
+  padding-bottom: 2rem;
 }
 
 /* Text styles */
@@ -73,6 +45,7 @@ svg.modal-logo {
   font-family: initial;
   color: initial;
   fill: initial;
+  display: none;
 }
 
 /* Button styles */
@@ -130,7 +103,7 @@ svg.modal-logo {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: space-between;
   font-size: calc(10px + 2vmin);
   color: white;
 }
@@ -146,4 +119,46 @@ svg.modal-logo {
   to {
     transform: rotate(360deg);
   }
+}
+
+
+/* login */
+
+.loginSection {
+  position: absolute;
+  right: 30px;
+  top: -5px;
+  width: 100px;
+  z-index: 1000;
+}
+
+
+.styledButton {
+  background-color: transparent;
+  border: 1px solid white;
+  border-radius: 20px;
+  color: white;
+  padding: 10px 20px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.styledButton:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.loginButton {
+  width: 100%;
+}
+
+.logoutButton {
+  margin-top: 10px;
+}
+
+.welcomeMessage {
+  display: block;
+  margin-bottom: 10px;
+  color: white;
+  font-size: 16px;
 }
