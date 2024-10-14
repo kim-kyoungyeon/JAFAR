@@ -114,6 +114,7 @@ const UPLOAD_DIR = path.join(__dirname, "uploads");
 app.post("/api/select-image", async (req, res) => {
   try {
     const { imageUrl } = req.body;
+    console.log("11", imageUrl);
     if (!imageUrl) {
       return res.status(400).json({ error: "Image URL is required" });
     }
@@ -122,6 +123,7 @@ app.post("/api/select-image", async (req, res) => {
     const imageResponse = await axios.get(imageUrl, {
       responseType: "arraybuffer",
     });
+    console.log("1", imageResponse);
     const imageBuffer = Buffer.from(imageResponse.data, "binary");
 
     // Java API로 이미지 정보 전송
