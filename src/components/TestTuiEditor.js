@@ -3,14 +3,34 @@ import ImageEditor from "@toast-ui/react-image-editor";
 import "tui-image-editor/dist/tui-image-editor.css";
 import "../styles/editor.css";
 import axiosInstance from "../utils/axiosConfig";
-import Logo from '../components/Logo';
+import Logo from "../components/Logo";
 import useAuth from "../hooks/useAuth";
+import axios from "axios";
+import S3ImageRetrieval from "./S3ImageRetrieval";
 
-const FASTAPI_URL = "";
+import { debounce } from "lodash";
 
+const API_URL =
+  process.env.NODE_ENV === "production"
+    ? process.env.REACT_APP_PROD_API_URL
+    : process.env.REACT_APP_DEV_API_URL;
+
+const api = axios.create({
+  baseURL: API_URL,
+  withCredentials: true,
+});
+
+// const TestTuiEditor = ({ isLoggedIn, username, onLoginClick, onLogout }) => {
 
 const TestTuiEditor = () => {
-  const { isLoggedIn, username, handleLoginSuccess, logout, checkAuthStatus, onLogout, onLoginClick } = useAuth();
+  const {
+    isLoggedIn,
+    username,
+    checkAuthStatus,
+    onLogout,
+    onLoginClick,
+    handleLoginSuccess,
+  } = useAuth();
   const [showLoginModal, setShowLoginModal] = useState(false);
 
   const editorRef = useRef(null);
@@ -18,30 +38,59 @@ const TestTuiEditor = () => {
   const [prompt, setPrompt] = useState("");
   const [recommendedImages, setRecommendedImages] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [searchKeyword, setSearchKeyword] = useState("");
 
+  const handleNaverLogin = () => {
+    const authUrl = "/oauth2/authorization/naver";
+    window.location.href = authUrl;
+  };
+
+  const handleLoginClick = () => {
+    setShowLoginModal(true);
+  };
+
+  const handleCloseModal = () => {
+    setShowLoginModal(false);
+  };
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      const isAuthenticated = await checkAuthStatus();
+      if (isAuthenticated) {
+        handleLoginSuccess();
+        setShowLoginModal(false);
+      }
+    };
+    checkAuth();
+  }, [checkAuthStatus, handleLoginSuccess]);
   useEffect(() => {
     let isMounted = true;
     let retryCount = 0;
     const maxRetries = 3;
-    
+
     const initializeEditor = async () => {
       if (editorRef.current && isMounted) {
         try {
           const instance = editorRef.current.getInstance();
           setEditorInstance(instance);
-          
-          await new Promise((resolve) => setTimeout(resolve, 500));
 
-          await instance.loadImageFromURL(
-            "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7",
-            "blank"
-          );
-          console.log("Editor initialized successfully");
+          await new Promise((resolve) => setTimeout(resolve, 1000));
+          if (instance && typeof instance.loadImageFromURL === "function") {
+            await instance.loadImageFromURL(
+              "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7",
+              "blank"
+            );
+            console.log("Editor initialized successfully");
+          } else {
+            throw new Error("Editor instance not properly initialized");
+          }
         } catch (error) {
           console.error("Error initializing editor:", error);
           if (retryCount < maxRetries) {
             retryCount++;
-            console.log(`Retrying initialization (${retryCount}/${maxRetries})...`);
+            console.log(
+              `Retrying initialization (${retryCount}/${maxRetries})...`
+            );
             setTimeout(initializeEditor, 1000);
           }
         }
@@ -72,6 +121,24 @@ const TestTuiEditor = () => {
     uploadInput.click();
   };
 
+  const handleImageSelect = async (imageUrl) => {
+    if (editorInstance) {
+      try {
+        const proxyUrl = `${API_URL}/api/image-proxy?url=${encodeURIComponent(
+          imageUrl
+        )}`;
+        await editorInstance.loadImageFromURL(proxyUrl, "selected");
+        editorInstance.clearUndoStack();
+        // 선택된 이미지 URL을 서버로 전송
+        const response = await api.post("/api/select-image", { imageUrl });
+        console.log("Image selection response:", response.data);
+      } catch (error) {
+        console.error("Error loading image:", error);
+        alert("이미지 로딩 중 오류가 발생했습니다.");
+      }
+    }
+  };
+
   const handleDownload = () => {
     if (editorInstance) {
       const dataURL = editorInstance.toDataURL();
@@ -82,44 +149,64 @@ const TestTuiEditor = () => {
     }
   };
 
-  const handleGenerateImages = async () => {
+  // const handleGenerateImages = async () => {
+  //   if (!prompt) {
+  //     alert("프롬프트를 입력해주세요.");
+  //     return;
+  //   }
+  //   setIsLoading(true);
+
+  //   try {
+  //     const response = await axiosInstance.post(
+  //       `/api/generate-image`,
+  //       { prompt },
+  //       { responseType: "arraybuffer" }
+  //     );
+
+  //     const blob = new Blob([response.data], { type: "image/png" });
+  //     const imageUrl = URL.createObjectURL(blob);
+
+  //     setRecommendedImages([imageUrl]);
+
+  //     if (editorInstance) {
+  //       editorInstance.loadImageFromURL(imageUrl, "generated");
+  //     }
+  //   } catch (error) {
+  //     console.error("Error generating image:", error);
+  //     alert("이미지 생성 중 오류가 발생했습니다.");
+  //   } finally {
+  //     setIsLoading(false);
+  //   }
+  // };
+
+  // const handleLogin = () => {
+  //   setShowLoginModal(true);
+  // };
+
+  // const handleCloseModal = async () => {
+  //   setShowLoginModal(false);
+  //   await checkAuthStatus();
+  // };
+
+  const debouncedHandleGenerateImages = debounce(async () => {
     if (!prompt) {
       alert("프롬프트를 입력해주세요.");
       return;
     }
     setIsLoading(true);
-    
     try {
-      const response = await axiosInstance.post(
-        `/api/generate-image`,
-        { prompt },
-        { responseType: 'arraybuffer' }
+      const response = await api.get(
+        `/api/images?keyword=${encodeURIComponent(prompt)}`
       );
-      
-      const blob = new Blob([response.data], { type: 'image/png' });
-      const imageUrl = URL.createObjectURL(blob);
-      
-      setRecommendedImages([imageUrl]);
-      
-      if (editorInstance) {
-        editorInstance.loadImageFromURL(imageUrl, "generated");
-      }
+      setSearchKeyword(prompt);
+      setRecommendedImages(response.data);
     } catch (error) {
-      console.error("Error generating image:", error);
+      console.error("Error generating images:", error);
       alert("이미지 생성 중 오류가 발생했습니다.");
     } finally {
       setIsLoading(false);
     }
-  };
-
-  const handleLogin = () => {
-    setShowLoginModal(true);
-  };
-
-  const handleCloseModal = async () => {
-    setShowLoginModal(false);
-    await checkAuthStatus();
-  };
+  }, 300);
 
   return (
     <div className="editor-container">
@@ -176,6 +263,13 @@ const TestTuiEditor = () => {
             rotatingPointOffset: 70,
           }}
           usageStatistics={true}
+          crossOrigin="anonymous"
+          customOptions={{
+            zoom: {
+              min: 0.1,
+              max: 5,
+            },
+          }}
         />
       </div>
       <div className="right-sidebar">
@@ -187,14 +281,14 @@ const TestTuiEditor = () => {
           onChange={(e) => setPrompt(e.target.value)}
           placeholder="프롬프트 입력"
         />
-        <button onClick={handleGenerateImages} disabled={isLoading}>
-          {isLoading ? "생성 중..." : "이미지 생성"}
+        <button onClick={debouncedHandleGenerateImages} disabled={isLoading}>
+          {isLoading ? "처리 중..." : "이미지 검색/생성"}
         </button>
-        {recommendedImages.map((image, index) => (
-          <div key={index} className="image-preview">
-            <img src={image} alt={`Generated image ${index + 1}`} />
-          </div>
-        ))}
+        <S3ImageRetrieval
+          keyword={searchKeyword}
+          onImageSelect={handleImageSelect}
+          recommendedImages={recommendedImages}
+        />
       </div>
     </div>
   );
