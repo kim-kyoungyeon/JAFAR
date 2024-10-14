@@ -3,43 +3,43 @@ import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import "./styles/App.css";
 import "./styles/BlurredLoginModal.css";
 import TestTuiEditor from "./components/TestTuiEditor";
+import S3ImageCRUD from "./services/S3ImageCRUD";
 import BlurredLoginModal from "./components/BlurredLoginModal";
 import OAuthCallback from "./components/OAuthCallback";
 import Logo from "./components/Logo";
-import useAuth from "./hooks/useAuth";
-import axios from 'axios';
-
 
 function App() {
-  const { email, isLoggedIn, handleLoginSuccess, handleLogout } = useAuth();
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [username, setUsername] = useState("");
   const [showLoginModal, setShowLoginModal] = useState(false);
 
+  useEffect(() => {
+    const handleAuthMessage = (event) => {
+      if (event.origin !== "http://43.203.233.134:3000") return;
+      
+      if (event.data.type === 'AUTH_SUCCESS') {
+        setIsLoggedIn(true);
+        // You might want to fetch the username from your backend here
+        setUsername("User"); // Placeholder username
+        setShowLoginModal(false);
+      }
+    };
+
+    window.addEventListener('message', handleAuthMessage);
+
+    return () => {
+      window.removeEventListener('message', handleAuthMessage);
+    };
+  }, []);
 
   const handleOpenLoginModal = () => setShowLoginModal(true);
   const handleCloseLoginModal = () => setShowLoginModal(false);
 
-  const [userInfo, setUserInfo] = useState(null);
-  const [error, setError] = useState(null);
-
-  useEffect(() => {
-    const fetchUserInfo = async () => {
-      try {
-        const response = await axios.get('http://localhost:8080/user-info', {
-          withCredentials: true
-        });
-        setUserInfo(response.data);
-        handleLoginSuccess({
-          email: response.data.email
-        });
-      } catch (err) {
-        setError('Failed to fetch user info');
-        console.error(err);
-      }
-    };
-
-    fetchUserInfo();
-  }, [handleLoginSuccess]);
-  
+  const handleLogout = () => {
+    setIsLoggedIn(false);
+    setUsername("");
+    document.cookie = 'auth_token=; path=/; domain=43.203.233.134; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+  };
 
   return (
     <Router>
@@ -50,7 +50,7 @@ function App() {
             <div className="loginSection">
               {isLoggedIn ? (
                 <>
-                  <span className="welcomeMessage">{email}!</span>
+                  <span className="welcomeMessage">Welcome, {username}!</span>
                   <button className="styledButton logoutButton" onClick={handleLogout}>Logout</button>
                 </>
               ) : (
@@ -60,17 +60,13 @@ function App() {
           </header>
           <Routes>
             <Route path="/" element={<TestTuiEditor />} />
-            <Route 
-              path="/login/oauth2/code/naver" 
-              element={<OAuthCallback onLoginSuccess={handleLoginSuccess} />} 
-            />
+            <Route path="/login/oauth2/code/naver" element={<OAuthCallback />} />
           </Routes>
         </div>
       </div>
       {showLoginModal && (
         <BlurredLoginModal
           onClose={handleCloseLoginModal}
-          onLoginSuccess={handleLoginSuccess}
         />
       )}
     </Router>
