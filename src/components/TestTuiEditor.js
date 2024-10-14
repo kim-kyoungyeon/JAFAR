@@ -5,12 +5,13 @@ import "../styles/editor.css";
 import axiosInstance from "../utils/axiosConfig";
 import Logo from '../components/Logo';
 import useAuth from "../hooks/useAuth";
+import UserImageList from "./UserImageList";
 
 const FASTAPI_URL = "";
 
 
 const TestTuiEditor = () => {
-  const { isLoggedIn, username, handleLoginSuccess, logout, checkAuthStatus, onLogout, onLoginClick } = useAuth();
+  const { isLoggedIn } = useAuth();
   const [showLoginModal, setShowLoginModal] = useState(false);
 
   const editorRef = useRef(null);
@@ -18,6 +19,7 @@ const TestTuiEditor = () => {
   const [prompt, setPrompt] = useState("");
   const [recommendedImages, setRecommendedImages] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [savedImages, setSavedImages] = useState([]);
 
   useEffect(() => {
     let isMounted = true;
@@ -52,7 +54,8 @@ const TestTuiEditor = () => {
     return () => {
       isMounted = false;
     };
-  }, []);
+  }, [isLoggedIn]);
+
 
   const handleUpload = () => {
     const uploadInput = document.createElement("input");
@@ -112,14 +115,43 @@ const TestTuiEditor = () => {
     }
   };
 
-  const handleLogin = () => {
-    setShowLoginModal(true);
+
+  //save 관련 --------
+  const handleSave = async () => {
+    if (!editorInstance) {
+      alert("편집기가 초기화되지 않았습니다.");
+      return;
+    }
+  
+    try {
+      const dataURL = editorInstance.toDataURL();
+      const blob = await (await fetch(dataURL)).blob();
+      const file = new File([blob], "edited-image.png", { type: "image/png" });
+  
+      const formData = new FormData();
+      formData.append("file", file);
+  
+      console.log("Sending save request...");
+      const response = await axiosInstance.post("/pictures/save", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+  
+      console.log("Save response:", response);
+      alert("이미지가 성공적으로 저장되었습니다: " + response.data);
+    } catch (error) {
+      console.error("Error saving image:", error);
+      alert("이미지 저장 중 오류가 발생했습니다: " + error.message);
+    }
   };
 
-  const handleCloseModal = async () => {
-    setShowLoginModal(false);
-    await checkAuthStatus();
-  };
+
+  useEffect(() => {
+    console.log("isLoggedIn status:", isLoggedIn); // 로그인 상태 확인
+    if (isLoggedIn) {
+    }
+  }, [isLoggedIn]);
 
   return (
     <div className="editor-container">
@@ -133,15 +165,7 @@ const TestTuiEditor = () => {
             <button onClick={handleDownload} disabled={!editorInstance}>
               Download
             </button>
-            <button>Save</button>
-          </div>
-          <div className="header-buttons">
-            <button>내보내기</button>
-            {isLoggedIn ? (
-              <button onClick={onLogout}>Logout ({username})</button>
-            ) : (
-              <button onClick={onLoginClick}>Login</button>
-            )}
+            <button onClick={handleSave} >Save</button>
           </div>
         </header>
         <ImageEditor
@@ -195,6 +219,8 @@ const TestTuiEditor = () => {
             <img src={image} alt={`Generated image ${index + 1}`} />
           </div>
         ))}
+        
+                
       </div>
     </div>
   );
