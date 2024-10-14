@@ -14,7 +14,7 @@ const app = express();
 
 app.use(
   cors({
-    origin: ["http://localhost:3000", "http://localhost:3002"],
+    origin: ["http://localhost:3000", "http://43.203.233.134:3000"],
     credentials: true,
   })
 );
@@ -198,7 +198,7 @@ app.use("/uploads", express.static(UPLOAD_DIR));
 // 정적 파일 제공 (React 빌드 파일)
 app.use(express.static(path.join(__dirname, "build")));
 
-const PORT = process.env.NODE_ENV === "production" ? 3000 : 3002;
+const PORT = process.env.SERVER_PORT || 3002;
 
 // 모든 요청을 React 앱으로 라우팅
 app.get("*", (req, res) => {

@@ -2,9 +2,11 @@ import React, { useState, useRef, useEffect } from "react";
 import ImageEditor from "@toast-ui/react-image-editor";
 import "tui-image-editor/dist/tui-image-editor.css";
 import "../styles/editor.css";
+import axiosInstance from "../utils/axiosConfig";
+import Logo from "../components/Logo";
+import useAuth from "../hooks/useAuth";
 import axios from "axios";
 import S3ImageRetrieval from "./S3ImageRetrieval";
-import Logo from "../components/Logo";
 
 import { debounce } from "lodash";
 
@@ -18,7 +20,19 @@ const api = axios.create({
   withCredentials: true,
 });
 
-const TestTuiEditor = ({ isLoggedIn, username, onLoginClick, onLogout }) => {
+// const TestTuiEditor = ({ isLoggedIn, username, onLoginClick, onLogout }) => {
+
+const TestTuiEditor = () => {
+  const {
+    isLoggedIn,
+    username,
+    checkAuthStatus,
+    onLogout,
+    onLoginClick,
+    handleLoginSuccess,
+  } = useAuth();
+  const [showLoginModal, setShowLoginModal] = useState(false);
+
   const editorRef = useRef(null);
   const [editorInstance, setEditorInstance] = useState(null);
   const [prompt, setPrompt] = useState("");
@@ -26,6 +40,29 @@ const TestTuiEditor = ({ isLoggedIn, username, onLoginClick, onLogout }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [searchKeyword, setSearchKeyword] = useState("");
 
+  const handleNaverLogin = () => {
+    const authUrl = "/oauth2/authorization/naver";
+    window.location.href = authUrl;
+  };
+
+  const handleLoginClick = () => {
+    setShowLoginModal(true);
+  };
+
+  const handleCloseModal = () => {
+    setShowLoginModal(false);
+  };
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      const isAuthenticated = await checkAuthStatus();
+      if (isAuthenticated) {
+        handleLoginSuccess();
+        setShowLoginModal(false);
+      }
+    };
+    checkAuth();
+  }, [checkAuthStatus, handleLoginSuccess]);
   useEffect(() => {
     let isMounted = true;
     let retryCount = 0;
@@ -84,16 +121,6 @@ const TestTuiEditor = ({ isLoggedIn, username, onLoginClick, onLogout }) => {
     uploadInput.click();
   };
 
-  const handleDownload = () => {
-    if (editorInstance) {
-      const dataURL = editorInstance.toDataURL();
-      const link = document.createElement("a");
-      link.download = "edited-image.png";
-      link.href = dataURL;
-      link.click();
-    }
-  };
-
   const handleImageSelect = async (imageUrl) => {
     if (editorInstance) {
       try {
@@ -111,6 +138,55 @@ const TestTuiEditor = ({ isLoggedIn, username, onLoginClick, onLogout }) => {
       }
     }
   };
+
+  const handleDownload = () => {
+    if (editorInstance) {
+      const dataURL = editorInstance.toDataURL();
+      const link = document.createElement("a");
+      link.download = "edited-image.png";
+      link.href = dataURL;
+      link.click();
+    }
+  };
+
+  // const handleGenerateImages = async () => {
+  //   if (!prompt) {
+  //     alert("프롬프트를 입력해주세요.");
+  //     return;
+  //   }
+  //   setIsLoading(true);
+
+  //   try {
+  //     const response = await axiosInstance.post(
+  //       `/api/generate-image`,
+  //       { prompt },
+  //       { responseType: "arraybuffer" }
+  //     );
+
+  //     const blob = new Blob([response.data], { type: "image/png" });
+  //     const imageUrl = URL.createObjectURL(blob);
+
+  //     setRecommendedImages([imageUrl]);
+
+  //     if (editorInstance) {
+  //       editorInstance.loadImageFromURL(imageUrl, "generated");
+  //     }
+  //   } catch (error) {
+  //     console.error("Error generating image:", error);
+  //     alert("이미지 생성 중 오류가 발생했습니다.");
+  //   } finally {
+  //     setIsLoading(false);
+  //   }
+  // };
+
+  // const handleLogin = () => {
+  //   setShowLoginModal(true);
+  // };
+
+  // const handleCloseModal = async () => {
+  //   setShowLoginModal(false);
+  //   await checkAuthStatus();
+  // };
 
   const debouncedHandleGenerateImages = debounce(async () => {
     if (!prompt) {
