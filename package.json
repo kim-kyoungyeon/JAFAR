@@ -2,7 +2,7 @@
   "name": "jafar_front",
   "version": "0.1.0",
   "private": true,
-  "proxy": "http://localhost:3002",
+  "proxy": "http://localhost:3000",
   "dependencies": {
     "@aws-sdk/client-s3": "^3.669.0",
     "@toast-ui/editor": "^3.2.2",
