@@ -4,14 +4,15 @@ module.exports = function (app) {
   app.use(
     "/api",
     createProxyMiddleware({
-      target: "http://localhost:3002",
+      target: "http://localhost:3000",
       changeOrigin: true,
     })
   );
   app.use(
     ["/java-api", "/oauth2"],
     createProxyMiddleware({
-      target: "http://3.39.251.48:8080",
+      //target: "http://3.39.251.48:8080",
+      target: "http://localhost:8080",
       changeOrigin: true,
       onProxyRes: function (proxyRes, req, res) {
         // CORS 헤더 설정
