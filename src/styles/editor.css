@@ -1,97 +1,187 @@
 .tui-image-editor-header {
-    display: none !important;
-  }
+  display: none !important;
+}
 
-  
+
 
 .modal-logo {
-  position: absolute !important;
-  top: 10px !important;
-  left: 10px !important;
-  width: 84px !important;
-  height: 10px !important;
-  z-index: 1000;
+position: absolute !important;
+top: 10px !important;
+left: 10px !important;
+width: 84px !important;
+height: 10px !important;
+z-index: 1000;
 }
 
 .editor-container {
-    display: flex;
-    background-color: #1e1e1e;
-    color: white;
-    height: 100vh;
-  }
-  
-  .main-content {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-  }
-  
-  .header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 10px 20px;
-    background-color: #2d2d2d;
-  }
-  
-  .header-buttons {
-    display: flex;
-    gap: 10px;
-  }
-  
-  .right-sidebar {
-    width: 300px;
-    background-color: #2d2d2d;
-    padding: 20px;
-    overflow-y: auto;
-    height: calc(100vh - 60px);
-  }
-  
-  .prompt-input {
-    width: 100%;
-    padding: 8px;
-    margin-bottom: 10px;
-  }
-  
-.refresh-button {
+  display: flex;
+  background-color: #1e1e1e;
+  color: white;
+  height: 100vh;
+}
+
+.main-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 20px;
+  background-color: #1E1E1E;
+}
+
+.header-buttons {
+  display: flex;
+  gap: 10px;
+}
+
+
+.prompt-input {
   width: 100%;
   padding: 8px;
   margin-bottom: 10px;
 }
 
-.image-list {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-  gap: 10px;
+.refresh-button {
+width: 100%;
+padding: 8px;
+margin-bottom: 10px;
 }
 
-  .image-preview {
-    width: 100%;
-    height: 100px;
-    background-color: #444;
-    margin-bottom: 20px;
-  }
-  
+.image-list {
+display: grid;
+grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+gap: 10px;
+}
+
+.image-preview {
+  width: 100%;
+  height: 100px;
+  background-color: #444;
+  margin-bottom: 20px;
+}
+
 
 .image-preview img {
-  width: 100%;
-  height: 120px;
-  object-fit: cover;
-  border-radius: 4px;
+width: 100%;
+height: 120px;
+object-fit: cover;
+border-radius: 4px;
 }
 
 .image-preview p {
-  margin-top: 5px;
-  font-size: 12px;
-  text-align: center;
-  word-break: break-all;
+margin-top: 5px;
+font-size: 12px;
+text-align: center;
+word-break: break-all;
 }
-  
-  .button {
-    background-color: #0066cc;
-    color: white;
-    border: none;
-    padding: 8px 16px;
-    border-radius: 4px;
-    cursor: pointer;
-  }
+
+.button {
+  background-color: #0066cc;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.styledButton {
+  background-color: transparent;
+  border: 1px solid white;
+  border-radius: 20px;
+  color: white;
+  padding: 8px 15px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+}
+
+/* sidebar */
+
+.right-sidebar {
+  width: 300px;
+  background-color: #1E1E1E;
+  padding: 20px;
+  overflow-y: auto;
+  height: calc(100vh - 60px);
+  display: flex;
+  flex-direction: column;
+}
+
+.sidebar-buttons {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.sidebar-button {
+  background-color: transparent;
+  color: white;
+  border: 1px solid white;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  flex: 1;
+  margin: 0 5px;
+}
+
+.sidebar-content {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.prompt-section, .saved-images-section {
+  display: none;
+}
+
+.prompt-section.active, .saved-images-section.active {
+  display: block;
+}
+
+/* 이미지 생성 */
+
+.prompt-input-container {
+  background-color: #333333;
+  border-radius: 8px;
+  padding: 10px;
+  margin-bottom: 15px;
+}
+
+.prompt-input {
+  width: 100%;
+  background-color: transparent;
+  border: none;
+  color: white;
+  font-size: 14px;
+  outline: none;
+}
+
+.prompt-input::placeholder {
+  color: #888888;
+}
+
+.generate-button {
+  width: 100%;
+  background-color: #4a4a4a;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 10px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.generate-button:hover {
+  background-color: #5a5a5a;
+}
+
+.generate-button:disabled {
+  background-color: #3a3a3a;
+  cursor: not-allowed;
+}
