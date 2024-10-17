@@ -48,7 +48,7 @@ function App() {
             <div className="loginSection">
               {isLoggedIn ? (
                 <>
-                  <span className="welcomeMessage">{email}</span>
+                  <span className="userEmail">{email}</span>
                   <button className="styledButton logoutButton" onClick={handleLogout}>Logout</button>
                 </>
               ) : (

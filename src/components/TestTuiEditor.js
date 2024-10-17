@@ -31,6 +31,7 @@ const TestTuiEditor = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [savedImages, setSavedImages] = useState([]);
   const [searchKeyword, setSearchKeyword] = useState("");
+  const [activeSection, setActiveSection] = useState("prompt");
 
   useEffect(() => {
     let isMounted = true;
@@ -166,10 +167,20 @@ const TestTuiEditor = () => {
   };
 
   useEffect(() => {
-    console.log("isLoggedIn status:", isLoggedIn); // 로그인 상태 확인
+    console.log("isLoggedIn status:", isLoggedIn); 
     if (isLoggedIn) {
     }
   }, [isLoggedIn]);
+
+
+  //이미지조회
+  const handleSavedImagesClick = async () => {
+    setActiveSection("savedImages");
+    // 여기에 저장된 이미지를 가져오는 로직을 추가할 수 있습니다.
+    // 예: const savedImages = await fetchSavedImages();
+    // setSavedImages(savedImages);
+  };
+
 
   return (
     <div className="editor-container">
@@ -177,13 +188,13 @@ const TestTuiEditor = () => {
         <header className="header">
           <Logo className="modal-logo" />
           <div className="header-buttons">
-            <button onClick={handleUpload} disabled={!editorInstance}>
+            <button className="styledButton" onClick={handleUpload} disabled={!editorInstance}>
               Load
             </button>
-            <button onClick={handleDownload} disabled={!editorInstance}>
+            <button className="styledButton" onClick={handleDownload} disabled={!editorInstance}>
               Download
             </button>
-            <button onClick={handleSave} >Save</button>
+            <button className="styledButton" onClick={handleSave} >Save</button>
           </div>
         </header>
         <ImageEditor
@@ -221,26 +232,50 @@ const TestTuiEditor = () => {
         />
       </div>
       <div className="right-sidebar">
-        <h3>생성형 이미지 추천</h3>
-        <p>사진과 유사한 생성형 이미지를 추천합니다.</p>
-        <input
-          type="text"
-          value={prompt}
-          onChange={(e) => setPrompt(e.target.value)}
-          placeholder="프롬프트 입력"
-        />
-        <button onClick={debouncedHandleGenerateImages} disabled={isLoading}>
-          {isLoading ? "처리 중..." : "이미지 검색/생성"}
-        </button>
-        <S3ImageRetrieval
-          keyword={searchKeyword}
-          onImageSelect={handleImageSelect}
-          recommendedImages={recommendedImages}
-        />
+        <div className="sidebar-buttons">
+          <button 
+            className="sidebar-button" 
+            onClick={() => setActiveSection("prompt")}
+          >
+            이미지 생성
+          </button>
+          <button 
+            className="sidebar-button" 
+            onClick={handleSavedImagesClick}
+          >
+            내 기록
+          </button>
+        </div>
+        <div className="sidebar-content">
+          <div className={`prompt-section ${activeSection === "prompt" ? "active" : ""}`}>
+          <div className="prompt-input-container">
+            <input
+              className="prompt-input"
+              type="text"
+              value={prompt}
+              onChange={(e) => setPrompt(e.target.value)}
+              placeholder="프롬프트를 입력해주세요"
+            />
+          </div>
+            <button className="generate-button" onClick={debouncedHandleGenerateImages} disabled={isLoading}>
+              {isLoading ? "처리 중..." : "이미지 생성"}
+            </button>
+            <S3ImageRetrieval
+              keyword={searchKeyword}
+              onImageSelect={handleImageSelect}
+              recommendedImages={recommendedImages}
+            />
+          </div>
+          <div className={`saved-images-section ${activeSection === "savedImages" ? "active" : ""}`}>
+            <h3></h3>
+            <p>저장된 이미지 여기 표시</p>
+          </div>
+        </div>
       </div>
     </div>
   );
 };
 
 export default TestTuiEditor;
+
 

@@ -13,7 +13,7 @@ html {
 /* App container */
 .app-container {
   min-height: 100vh;
-  background-color: #000000;
+  background-color: #141414;
   position: relative;
   overflow: hidden;
 }
@@ -174,21 +174,23 @@ svg.modal-logo {
 .loginSection {
   position: absolute;
   right: 30px;
-  top: -5px;
-  width: 100px;
+  top: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
   z-index: 1000;
 }
-
 
 .styledButton {
   background-color: transparent;
   border: 1px solid white;
   border-radius: 20px;
   color: white;
-  padding: 10px 20px;
-  font-size: 16px;
+  padding: 8px 15px;
+  font-size: 14px;
   cursor: pointer;
   transition: all 0.3s ease;
+  white-space: nowrap;
 }
 
 .styledButton:hover {
@@ -196,16 +198,16 @@ svg.modal-logo {
 }
 
 .loginButton {
-  width: 100%;
+  width: auto;
 }
 
 .logoutButton {
-  margin-top: 10px;
+  width: auto;
+  margin-left: 10px;
 }
 
-.welcomeMessage {
-  display: block;
-  margin-bottom: 10px;
+.userEmail {
   color: white;
-  font-size: 16px;
+  font-size: 14px;
+  margin-right: 10px;
 }
