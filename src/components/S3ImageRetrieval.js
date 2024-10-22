@@ -1,11 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 
-const API_URL =
-  process.env.NODE_ENV === "production"
-    ? "/api"
-    : process.env.REACT_APP_API_URL;
-
+const API_URL = process.env.REACT_APP_API_URL || "http://localhost:3002";
 const S3ImageRetrieval = ({ keyword, onImageSelect, recommendedImages }) => {
   const [loadedImages, setLoadedImages] = useState([]);
 

@@ -10,10 +10,7 @@ import S3ImageRetrieval from "./S3ImageRetrieval";
 
 import { debounce } from "lodash";
 
-const API_URL =
-  process.env.NODE_ENV === "production"
-    ? process.env.REACT_APP_PROD_API_URL
-    : process.env.REACT_APP_DEV_API_URL;
+const API_URL = process.env.REACT_APP_API_URL || "http://localhost:3002";
 
 const api = axios.create({
   baseURL: API_URL,
@@ -37,13 +34,13 @@ const TestTuiEditor = () => {
     let isMounted = true;
     let retryCount = 0;
     const maxRetries = 3;
-    
+
     const initializeEditor = async () => {
       if (editorRef.current && isMounted) {
         try {
           const instance = editorRef.current.getInstance();
           setEditorInstance(instance);
-          
+
           await new Promise((resolve) => setTimeout(resolve, 500));
 
           await instance.loadImageFromURL(
@@ -55,7 +52,9 @@ const TestTuiEditor = () => {
           console.error("Error initializing editor:", error);
           if (retryCount < maxRetries) {
             retryCount++;
-            console.log(`Retrying initialization (${retryCount}/${maxRetries})...`);
+            console.log(
+              `Retrying initialization (${retryCount}/${maxRetries})...`
+            );
             setTimeout(initializeEditor, 1000);
           }
         }
@@ -97,7 +96,7 @@ const TestTuiEditor = () => {
     }
   };
 
-//AI 이미지 생성
+  //AI 이미지 생성
   const debouncedHandleGenerateImages = debounce(async () => {
     if (!prompt) {
       alert("프롬프트를 입력해주세요.");
@@ -142,22 +141,22 @@ const TestTuiEditor = () => {
       alert("편집기가 초기화되지 않았습니다.");
       return;
     }
-  
+
     try {
       const dataURL = editorInstance.toDataURL();
       const blob = await (await fetch(dataURL)).blob();
       const file = new File([blob], "edited-image.png", { type: "image/png" });
-  
+
       const formData = new FormData();
       formData.append("file", file);
-  
+
       console.log("Sending save request...");
       const response = await axiosInstance.post("/pictures/save", formData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
       });
-  
+
       console.log("Save response:", response);
       alert("이미지가 성공적으로 저장되었습니다: " + response.data);
     } catch (error) {
@@ -167,11 +166,10 @@ const TestTuiEditor = () => {
   };
 
   useEffect(() => {
-    console.log("isLoggedIn status:", isLoggedIn); 
+    console.log("isLoggedIn status:", isLoggedIn);
     if (isLoggedIn) {
     }
   }, [isLoggedIn]);
-
 
   //이미지조회
   const handleSavedImagesClick = async () => {
@@ -181,20 +179,29 @@ const TestTuiEditor = () => {
     // setSavedImages(savedImages);
   };
 
-
   return (
     <div className="editor-container">
       <div className="main-content">
         <header className="header">
           <Logo className="modal-logo" />
           <div className="header-buttons">
-            <button className="styledButton" onClick={handleUpload} disabled={!editorInstance}>
+            <button
+              className="styledButton"
+              onClick={handleUpload}
+              disabled={!editorInstance}
+            >
               Load
             </button>
-            <button className="styledButton" onClick={handleDownload} disabled={!editorInstance}>
+            <button
+              className="styledButton"
+              onClick={handleDownload}
+              disabled={!editorInstance}
+            >
               Download
             </button>
-            <button className="styledButton" onClick={handleSave} >Save</button>
+            <button className="styledButton" onClick={handleSave}>
+              Save
+            </button>
           </div>
         </header>
         <ImageEditor
@@ -233,31 +240,36 @@ const TestTuiEditor = () => {
       </div>
       <div className="right-sidebar">
         <div className="sidebar-buttons">
-          <button 
-            className="sidebar-button" 
+          <button
+            className="sidebar-button"
             onClick={() => setActiveSection("prompt")}
           >
             이미지 생성
           </button>
-          <button 
-            className="sidebar-button" 
-            onClick={handleSavedImagesClick}
-          >
+          <button className="sidebar-button" onClick={handleSavedImagesClick}>
             내 기록
           </button>
         </div>
         <div className="sidebar-content">
-          <div className={`prompt-section ${activeSection === "prompt" ? "active" : ""}`}>
-          <div className="prompt-input-container">
-            <input
-              className="prompt-input"
-              type="text"
-              value={prompt}
-              onChange={(e) => setPrompt(e.target.value)}
-              placeholder="프롬프트를 입력해주세요"
-            />
-          </div>
-            <button className="generate-button" onClick={debouncedHandleGenerateImages} disabled={isLoading}>
+          <div
+            className={`prompt-section ${
+              activeSection === "prompt" ? "active" : ""
+            }`}
+          >
+            <div className="prompt-input-container">
+              <input
+                className="prompt-input"
+                type="text"
+                value={prompt}
+                onChange={(e) => setPrompt(e.target.value)}
+                placeholder="프롬프트를 입력해주세요"
+              />
+            </div>
+            <button
+              className="generate-button"
+              onClick={debouncedHandleGenerateImages}
+              disabled={isLoading}
+            >
               {isLoading ? "처리 중..." : "이미지 생성"}
             </button>
             <S3ImageRetrieval
@@ -266,7 +278,11 @@ const TestTuiEditor = () => {
               recommendedImages={recommendedImages}
             />
           </div>
-          <div className={`saved-images-section ${activeSection === "savedImages" ? "active" : ""}`}>
+          <div
+            className={`saved-images-section ${
+              activeSection === "savedImages" ? "active" : ""
+            }`}
+          >
             <h3></h3>
             <p>저장된 이미지 여기 표시</p>
           </div>
@@ -277,5 +293,3 @@ const TestTuiEditor = () => {
 };
 
 export default TestTuiEditor;
-
-

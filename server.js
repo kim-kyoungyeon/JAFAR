@@ -4,21 +4,21 @@ const path = require("path");
 const axios = require("axios");
 require("dotenv").config();
 const { S3Client, ListObjectsV2Command } = require("@aws-sdk/client-s3");
-
 const CLIENT_URL =
-  process.env.NODE_ENV === "production"
-    ? process.env.REACT_APP_PROD_API_URL
-    : process.env.REACT_APP_DEV_API_URL;
+  process.env.PRO_CLIENT_URL || process.env.REACT_APP_CLIENT_URL;
 
+const JAVA_API_URL =
+  process.env.PRO_JAVA_API_URL || process.env.REACT_APP_JAVA_API_URL;
+
+const UPLOAD_DIR = path.join(__dirname, "uploads");
 const app = express();
 
 app.use(
   cors({
-    origin: ["http://localhost:3000", "http://43.203.233.134:3000"],
+    origin: CLIENT_URL,
     credentials: true,
   })
 );
-
 app.use(express.json());
 
 // AWS S3 설정
@@ -108,7 +108,6 @@ app.get("/api/image-proxy", async (req, res) => {
     res.status(500).send("Failed to proxy image");
   }
 });
-const UPLOAD_DIR = path.join(__dirname, "uploads");
 
 // 선택된 이미지 처리 API
 app.post("/api/select-image", async (req, res) => {
@@ -169,7 +168,7 @@ app.post("/api/generate-image", async (req, res) => {
     // 3. Java API로 이미지 정보 전송
     const imageUrl = `${req.protocol}://${req.get("host")}/uploads/${fileName}`;
     const saveResponse = await axios.post(
-      "http://3.39.251.48:8080/pictures/save",
+      `${JAVA_API_URL}/picture/save`,
       {
         url: imageUrl,
         format: "png",
@@ -199,6 +198,43 @@ app.use("/uploads", express.static(UPLOAD_DIR));
 app.use(express.static(path.join(__dirname, "build")));
 
 const PORT = process.env.SERVER_PORT || 3002;
+
+app.post("/api/save-image", async (req, res) => {
+  try {
+    const { image } = req.body;
+    const base64Data = image.replace(/^data:image\/\w+;base64,/, "");
+    const buffer = Buffer.from(base64Data, "base64");
+
+    // 로컬에 저장
+    const fileName = `saved_${Date.now()}.png`;
+    const filePath = path.join(UPLOAD_DIR, fileName);
+    await fs.promises.writeFile(filePath, buffer);
+
+    // Java API로 이미지 전송
+    const javaResponse = await axios.post(
+      `${JAVA_API_URL}/pictures/save`,
+      {
+        url: `${req.protocol}://${req.get("host")}/uploads/${fileName}`,
+        format: "png",
+        width: 512,
+        height: 512,
+        file: base64Data,
+      },
+      {
+        headers: { "Content-Type": "application/json" },
+      }
+    );
+
+    res.json({
+      message: "Image saved successfully",
+      localPath: `/uploads/${fileName}`,
+      javaResponse: javaResponse.data,
+    });
+  } catch (error) {
+    console.error("Error saving image:", error);
+    res.status(500).json({ error: "Failed to save image" });
+  }
+});
 
 // 모든 요청을 React 앱으로 라우팅
 app.get("*", (req, res) => {
